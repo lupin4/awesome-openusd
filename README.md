@@ -122,6 +122,7 @@ Scene and other assets put together to test USD features and as examples of how 
 ### Technical Learning
 
 - [Learn OpenUSD](https://docs.nvidia.com/learn-openusd/latest/index.html) – Open source USD developer learning path with lectures and guided exercises. ([Github](https://github.com/NVIDIA-Omniverse/LearnOpenUSD))
+- [OpenUSD Field Manual](https://lupin4.github.io/awesome-openusd/) – Interactive study guide: library-stack explorer, LIVERPS playground and nine composition puzzles, schemas verified against v26.11, Hydra 2.0, plugin skeletons, nine build projects, and the certification blueprint. ([Source](docs/index.html))
 - [Pixar USD Tutorials](https://openusd.org/release/tut_usd_tutorials.html) – 14 modules with step-by-step instructions showing how to use the Python API and the results in USDA and usdview
 - [ASWF USD-WG Presentations](https://wiki.aswf.io/display/WGUSD/Presentations) – Interesting presentations from the ASWF USD Working Group.
 - [USD Plugin Examples](https://github.com/wetadigital/USDPluginExamples) – Simple examples to demonstrate how to compile and build USD plugins.

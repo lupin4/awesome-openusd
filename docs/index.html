@@ -1,0 +1,1785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="An interactive OpenUSD study manual: library stack, LIVERPS playground and puzzles, schemas through v26.11, Hydra 2.0, plugins, projects and the NCP-OUSD exam blueprint.">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>OpenUSD Field Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a field manual — sticky chapter rail on the left, one reading column, interactive "strata" exhibits where composition is the point. */
+:root {
+  --bg: #F3F5F4; --surface: #FFFFFF; --sunk: #E8EDEB; --ink: #111816; --muted: #55625E; --rule: #D2DBD7;
+  --accent: #0A6E69; --accent-ink: #FFFFFF; --accent-soft: #D3EBE8;
+  --win: #A86C00; --win-soft: #FAEED3; --off: #9AA7A3;
+  --code-bg: #101715; --code-ink: #DCE6E2; --code-com: #7F928C; --code-str: #E8B65C; --code-kw: #6FD3C9; --code-path: #A9C1FF; --code-rule: #22302C;
+  --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 72px;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1211; --surface: #141B19; --sunk: #1A2321; --ink: #E2EAE7; --muted: #95A4A0; --rule: #28332F;
+    --accent: #3EC4BA; --accent-ink: #06201E; --accent-soft: #143430;
+    --win: #F2B53E; --win-soft: #3A2C0E; --off: #5D6B67;
+    --code-bg: #0A0F0E; --code-rule: #1C2724;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1211; --surface: #141B19; --sunk: #1A2321; --ink: #E2EAE7; --muted: #95A4A0; --rule: #28332F;
+  --accent: #3EC4BA; --accent-ink: #06201E; --accent-soft: #143430;
+  --win: #F2B53E; --win-soft: #3A2C0E; --off: #5D6B67;
+  --code-bg: #0A0F0E; --code-rule: #1C2724;
+  color-scheme: dark;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--sunk); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.12; margin: 0; }
+h2 { font-size: clamp(30px, 4.4vw, 44px); font-stretch: 112%; font-weight: 750; letter-spacing: -0.01em; }
+h3 { font-size: 22px; font-stretch: 100%; font-weight: 700; margin-top: var(--s6); }
+h4 { font-size: 16px; font-weight: 700; font-stretch: 100%; }
+p { margin: 0; max-width: 68ch; }
+ul, ol { margin: 0; padding-left: 1.25em; max-width: 68ch; }
+li + li { margin-top: 4px; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* shell */
+.shell { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--s7); padding-block: var(--s6) var(--s8); }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; max-height: calc(100vh - 48px); overflow: auto; font-size: 14px; }
+.rail .brand { font-family: var(--display); font-stretch: 120%; font-weight: 800; font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: var(--s4); }
+.rail ol { list-style: none; padding: 0; margin: 0; counter-reset: ch; }
+.rail li { margin: 0; }
+.rail a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 5px; color: var(--muted); text-decoration: none; line-height: 1.35; }
+.rail a span.n { font-family: var(--mono); font-size: 11.5px; color: var(--off); padding-top: 2px; min-width: 18px; }
+.rail a:hover { color: var(--ink); background: var(--sunk); }
+.rail a.on { color: var(--ink); background: var(--accent-soft); }
+.rail a.on span.n { color: var(--accent); }
+.rail .prog { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--rule); color: var(--muted); font-size: 13px; }
+.meter { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.meter > i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.mobnav { display: none; }
+main { min-width: 0; }
+section { padding-top: var(--s8); scroll-margin-top: 16px; }
+section > * + * { margin-top: var(--s4); }
+.eyebrow { font-family: var(--mono); font-size: 12.5px; color: var(--accent); letter-spacing: 0.02em; }
+.lead { font-size: 18.5px; color: var(--ink); max-width: 62ch; }
+.muted { color: var(--muted); }
+
+@media (max-width: 960px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: var(--s4) var(--s7); }
+  .rail { display: none; }
+  .mobnav { display: block; border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); margin-top: var(--s5); }
+  .mobnav summary { cursor: pointer; padding: 10px 14px; font-family: var(--display); font-weight: 700; font-stretch: 110%; }
+  .mobnav ol { padding: 0 14px 12px 32px; font-size: 15px; }
+  .mobnav a { color: var(--ink); }
+  section { padding-top: var(--s7); }
+}
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--s6); align-items: center; padding-top: var(--s5); }
+.hero h1 { font-size: clamp(44px, 7vw, 84px); font-stretch: 125%; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95; text-transform: uppercase; }
+.hero h1 em { font-style: normal; color: var(--accent); display: block; font-stretch: 62%; font-weight: 700; letter-spacing: 0; }
+.hero .lead { margin-top: var(--s5); }
+.hero .facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: var(--s5); font-size: 13.5px; color: var(--muted); font-family: var(--mono); }
+.hero .facts b { color: var(--ink); font-weight: 600; }
+@media (max-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+
+/* strata exhibit */
+.strata { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: var(--s5); }
+.strata .cap { font-size: 13px; color: var(--muted); }
+.stack { display: grid; gap: 8px; margin-top: var(--s3); perspective: 900px; }
+.sheet { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); transform: rotateX(18deg); transform-origin: center bottom;
+  transition: background .2s, border-color .2s, opacity .2s; font-size: 14px; }
+.sheet .nm { font-family: var(--mono); font-size: 12.5px; }
+.sheet .sub { display: block; font-size: 11.5px; color: var(--muted); font-family: var(--body); }
+.sheet .val { font-family: var(--mono); font-size: 13px; }
+.sheet[aria-pressed="false"] { opacity: .55; }
+.sheet[aria-pressed="false"] .val { text-decoration: line-through; color: var(--off); }
+.sheet.win { border-color: var(--win); background: var(--win-soft); }
+.sheet.win .val { color: var(--win); font-weight: 600; }
+.sheet:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.result { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px dashed var(--rule); font-family: var(--mono); font-size: 13.5px; }
+.result b { color: var(--win); }
+
+/* generic blocks */
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: var(--s5); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+@media (max-width: 720px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.note { border-left: 3px solid var(--win); background: var(--win-soft); padding: 12px 16px; border-radius: 0 var(--r) var(--r) 0; max-width: 72ch; }
+.note b { color: var(--ink); }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--display); font-weight: 700; font-stretch: 100%; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--sunk); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+td.wrap code { white-space: normal; }
+
+/* code */
+.code { position: relative; background: var(--code-bg); color: var(--code-ink); border-radius: var(--r); border: 1px solid var(--code-rule); max-width: 100%; }
+.code .bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 6px 14px; border-bottom: 1px solid var(--code-rule); font-family: var(--mono); font-size: 11.5px; color: var(--code-com); }
+.code .copy { all: unset; cursor: pointer; padding: 2px 8px; border-radius: 4px; color: var(--code-ink); font-size: 11.5px; }
+.code .copy:hover, .code .copy:focus-visible { background: var(--code-rule); }
+.code pre { margin: 0; padding: 14px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; tab-size: 4; }
+.code pre code { background: none; padding: 0; font-size: inherit; color: inherit; white-space: pre; }
+.c-com { color: var(--code-com); font-style: italic; }
+.c-str { color: var(--code-str); }
+.c-kw { color: var(--code-kw); }
+.c-path { color: var(--code-path); }
+
+/* architecture explorer */
+.arch { display: grid; gap: 10px; }
+.tier { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 12px; align-items: start; }
+.tier .tl { font-family: var(--display); font-stretch: 85%; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-top: 9px; }
+.tier .tl small { display: block; font-family: var(--mono); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; color: var(--off); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
+.chip { all: unset; cursor: pointer; font-family: var(--mono); font-size: 12.5px; padding: 5px 10px; border-radius: 4px; background: var(--sunk); color: var(--ink); }
+.chip:hover { background: var(--accent-soft); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.flowdown { font-family: var(--mono); font-size: 11.5px; color: var(--muted); padding-left: 144px; }
+@media (max-width: 640px) { .tier { grid-template-columns: minmax(0, 1fr); gap: 4px; } .tier .tl { padding-top: 0; } .flowdown { padding-left: 0; } }
+.detail { border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface); padding: var(--s5); }
+.detail h4 { font-family: var(--mono); font-size: 17px; }
+.detail dl { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 8px 16px; margin: 12px 0 0; font-size: 14.5px; }
+.detail dt { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; font-family: var(--display); font-weight: 700; }
+.detail dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .detail dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .detail dd { margin-bottom: 8px; } }
+
+/* arcs */
+.arcs { display: grid; gap: var(--s5); }
+.arc { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s4); }
+.arc .badge { font-family: var(--display); font-stretch: 125%; font-weight: 800; font-size: 30px; line-height: 1; color: var(--accent); text-align: center; }
+.arc .badge small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); font-weight: 400; margin-top: 6px; letter-spacing: 0; }
+.arc .body > * + * { margin-top: var(--s3); }
+@media (max-width: 560px) { .arc { grid-template-columns: minmax(0, 1fr); gap: 4px; } .arc .badge { text-align: left; } .arc .badge small { display: inline; margin-left: 8px; } }
+
+/* playground */
+.play { display: grid; gap: 6px; }
+.prow { display: grid; grid-template-columns: 34px minmax(0, 1fr) 110px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 5px; border: 1px solid var(--rule); background: var(--bg); }
+.prow .k { font-family: var(--display); font-weight: 800; font-stretch: 125%; color: var(--muted); text-align: center; }
+.prow label { display: flex; gap: 8px; align-items: center; cursor: pointer; font-size: 14px; min-width: 0; }
+.prow input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.prow input[type="text"] { width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 13px; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--ink); }
+.prow.win { border-color: var(--win); background: var(--win-soft); }
+.prow.win .k { color: var(--win); }
+.prow.dim { opacity: .6; }
+
+/* puzzles */
+.puzzles { display: grid; gap: var(--s4); }
+.pz { border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
+.pz header { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 14px 18px 0; }
+.pz header .t { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.pz header .lv { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.pz .q { padding: 8px 18px 14px; display: grid; gap: 12px; }
+.pz .reveal { all: unset; cursor: pointer; justify-self: start; font-weight: 600; font-size: 14px; color: var(--accent-ink); background: var(--accent); padding: 7px 14px; border-radius: 5px; }
+.pz .reveal:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.pz .ans { border-top: 1px solid var(--rule); padding: 14px 18px; background: var(--win-soft); border-radius: 0 0 var(--r) var(--r); }
+.pz .ans b { color: var(--win); font-family: var(--mono); }
+
+/* details/accordion */
+details.acc { border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
+details.acc + details.acc { margin-top: 8px; }
+details.acc > summary { cursor: pointer; list-style: none; padding: 12px 16px; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+details.acc > summary::-webkit-details-marker { display: none; }
+details.acc > summary .h { font-family: var(--display); font-weight: 700; font-size: 17px; }
+details.acc > summary .m { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+details.acc > summary::after { content: "+"; font-family: var(--mono); color: var(--accent); margin-left: auto; padding-left: 8px; }
+details.acc[open] > summary::after { content: "−"; }
+details.acc > .in { padding: 0 16px 16px; display: grid; gap: 12px; }
+
+/* hydra flow */
+.flow { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+.flow .st { flex: 1 1 150px; min-width: 0; border: 1px solid var(--rule); background: var(--surface); border-radius: var(--r); padding: 12px; position: relative; margin: 0 18px 10px 0; }
+.flow .st:not(:last-child)::after { content: "→"; position: absolute; right: -16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); }
+.flow .st h4 { font-size: 14px; }
+.flow .st p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.flow .st.key { border-color: var(--accent); }
+
+/* projects */
+.proj { display: grid; gap: var(--s4); }
+.pj { border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); padding: var(--s5); display: grid; gap: 10px; }
+.pj .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline; }
+.pj h3 { margin: 0; font-size: 20px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--rule); color: var(--muted); }
+.tag.lv { border-color: var(--accent); color: var(--accent); }
+.pj .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+.pj .cols h4 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.pj .cols ol, .pj .cols ul { font-size: 14.5px; }
+@media (max-width: 680px) { .pj .cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* exam bars */
+.bars { display: grid; gap: 6px; }
+.bar { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 190px minmax(0, 1fr) 46px; gap: 12px; align-items: center; padding: 6px 8px; border-radius: 5px; }
+.bar:hover, .bar[aria-expanded="true"] { background: var(--sunk); }
+.bar:focus-visible { outline: 2px solid var(--accent); }
+.bar .lbl { font-size: 14px; }
+.bar .track { height: 14px; background: var(--sunk); border-radius: 3px; position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px; }
+.bar.top .fill { background: var(--win); }
+.bar .pct { font-family: var(--mono); font-size: 13px; text-align: right; }
+.axis { display: grid; grid-template-columns: 190px minmax(0, 1fr) 46px; gap: 12px; padding: 0 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.axis .ticks { display: flex; justify-content: space-between; }
+@media (max-width: 600px) { .bar, .axis { grid-template-columns: 120px minmax(0, 1fr) 40px; } .bar .lbl { font-size: 12.5px; } }
+.areadetail { margin-top: 10px; }
+
+/* checklist */
+.phase { display: grid; gap: 4px; }
+.phase h4 { margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
+.phase h4 span { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 400; }
+.chk { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; padding: 4px 0; cursor: pointer; }
+.chk input { accent-color: var(--accent); width: 16px; height: 16px; margin-top: 4px; flex: none; }
+.chk input:checked + span { color: var(--muted); text-decoration: line-through; }
+
+/* cheat sheet */
+.search { display: flex; gap: 10px; align-items: center; }
+.search input { flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); color: var(--ink); }
+.search .cnt { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+footer { margin-top: var(--s8); padding-top: var(--s5); border-top: 1px solid var(--rule); color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail" aria-label="Chapters">
+    <div class="brand">OpenUSD Field Manual</div>
+    <ol id="railList">
+      <li><a href="#start"><span class="n">00</span>Start here</a></li>
+      <li><a href="#stack"><span class="n">01</span>The library stack</a></li>
+      <li><a href="#composition"><span class="n">02</span>Composition</a></li>
+      <li><a href="#resolution"><span class="n">03</span>Value resolution &amp; debugging</a></li>
+      <li><a href="#schemas"><span class="n">04</span>Schemas through v26.11</a></li>
+      <li><a href="#assets"><span class="n">05</span>Asset structure</a></li>
+      <li><a href="#hydra"><span class="n">06</span>Hydra</a></li>
+      <li><a href="#extending"><span class="n">07</span>Extending USD</a></li>
+      <li><a href="#projects"><span class="n">08</span>Nine projects</a></li>
+      <li><a href="#exam"><span class="n">09</span>NCP-OUSD exam</a></li>
+      <li><a href="#cheatsheet"><span class="n">10</span>Cheat sheet</a></li>
+      <li><a href="#sources"><span class="n">11</span>Sources</a></li>
+    </ol>
+    <div class="prog">
+      <div>Roadmap progress: <span id="progTxt" class="tnum">0 / 24</span></div>
+      <div class="meter"><i id="progBar"></i></div>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div>
+        <h1>OpenUSD <em>Field Manual</em></h1>
+        <p class="lead">From your first stage to custom schemas, Hydra scene indices and the NCP-OUSD exam. Written against OpenUSD v26.11 and the AOUSD Core Specification 1.0; every schema name and usda snippet is verified by parsing it in v26.11.</p>
+        <div class="facts"><span><b>12</b> chapters</span><span><b>9</b> composition puzzles</span><span><b>9</b> build projects</span><span>as of <b>Nov 11, 2026</b></span></div>
+        <details class="mobnav">
+          <summary>Chapters</summary>
+          <ol>
+            <li><a href="#start">Start here</a></li>
+            <li><a href="#stack">The library stack</a></li>
+            <li><a href="#composition">Composition</a></li>
+            <li><a href="#resolution">Value resolution &amp; debugging</a></li>
+            <li><a href="#schemas">Schemas through v26.11</a></li>
+            <li><a href="#assets">Asset structure</a></li>
+            <li><a href="#hydra">Hydra</a></li>
+            <li><a href="#extending">Extending USD</a></li>
+            <li><a href="#projects">Nine projects</a></li>
+            <li><a href="#exam">NCP-OUSD exam</a></li>
+            <li><a href="#cheatsheet">Cheat sheet</a></li>
+            <li><a href="#sources">Sources</a></li>
+          </ol>
+        </details>
+      </div>
+      <div class="strata" aria-label="Interactive layer stack">
+        <div class="cap">Tap a layer to mute or restore its opinion on <code>/World/Ball.radius</code>. The strongest remaining opinion wins.</div>
+        <div class="stack" id="heroStack"></div>
+        <div class="result" id="heroResult"></div>
+      </div>
+    </header>
+
+    <!-- 00 START -->
+    <section id="start">
+      <div class="eyebrow">&lt;/Manual/StartHere&gt;</div>
+      <h2>Start here</h2>
+      <p class="lead">Use NVIDIA's free Learn OpenUSD curriculum as the spine, the USD Survival Guide for production practice, and this manual for the depth neither covers in one place.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Resource</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://docs.nvidia.com/learn-openusd/latest/index.html" target="_blank" rel="noopener">Learn OpenUSD</a> (NVIDIA)</td><td>8 modules with runnable notebooks; the official study path for NCP-OUSD</td></tr>
+          <tr><td><a href="https://lucascheller.github.io/VFX-UsdSurvivalGuide" target="_blank" rel="noopener">USD Survival Guide</a> (Luca Scheller)</td><td>Pipeline-TD practice in Houdini, Python and C++: composition patterns, performance, resolvers</td></tr>
+          <tr><td><a href="https://openusd.org" target="_blank" rel="noopener">openusd.org</a> glossary + API docs</td><td>Definitive meanings of every term; class reference</td></tr>
+          <tr><td><a href="https://aousd.org/blog/foundations-of-open-3d-development-introducing-aousd-core-specification-1-0/" target="_blank" rel="noopener">AOUSD Core Specification 1.0</a></td><td>Normative rules for grammar, file formats, composition and value resolution</td></tr>
+          <tr><td><a href="https://forum.aousd.org" target="_blank" rel="noopener">forum.aousd.org</a></td><td>Real production questions: Hydra 2.0, resolvers, instancing</td></tr>
+          <tr><td>Kitchen Set, ALab, Activision Caldera</td><td>Production-grade scenes to read in usdview</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>The wider toolbox</h3>
+      <p>Picked from the <a href="https://github.com/lupin4/awesome-openusd" target="_blank" rel="noopener">awesome-openusd</a> list, which this manual lives beside. Open a group when you reach that part of the roadmap.</p>
+      <details class="acc">
+        <summary><span class="h">More to read and watch</span><span class="m">weeks 1–6</span></summary>
+        <div class="in"><ul>
+          <li><a href="https://openusd.org/release/tut_usd_tutorials.html" target="_blank" rel="noopener">Pixar USD Tutorials</a>: 14 step-by-step modules in Python, with the resulting usda.</li>
+          <li><a href="https://remedy-entertainment.github.io/USDBook/" target="_blank" rel="noopener">Book of USD</a> (Remedy): the gentlest overview of the vocabulary.</li>
+          <li><a href="https://learn-usd.github.io/" target="_blank" rel="noopener">OpenUSD in One Weekend</a>: a fast technical pass.</li>
+          <li><a href="https://confusing-acronym.com" target="_blank" rel="noopener">Confusing Acronym</a>: a blog of deep technical explanations.</li>
+          <li><a href="https://dl.acm.org/doi/10.1145/3587423.3595531" target="_blank" rel="noopener">USD in Production</a>: the SIGGRAPH 2023 course.</li>
+          <li><a href="https://www.youtube.com/watch?v=Yp_TRVD3wjQ" target="_blank" rel="noopener">What is USD: A Primer</a> (Rob Stauffer, SIGGRAPH 2019): the most complete video on stage composition.</li>
+          <li><a href="https://github.com/ColinKennedy/USD-Cookbook" target="_blank" rel="noopener">USD Cookbook</a> (Colin Kennedy): single-feature examples in C++, Python and usda.</li>
+          <li><a href="https://www.youtube.com/watch?v=FI2pyzTOvaQ" target="_blank" rel="noopener">USD at Remedy Entertainment</a>: how a game studio uses it.</li>
+        </ul></div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Viewers, editors and inspectors</span><span class="m">debugging</span></summary>
+        <div class="in"><ul>
+          <li><a href="https://github.com/cpichard/usdtweak" target="_blank" rel="noopener">usdtweak</a>: usdview with editing.</li>
+          <li><a href="https://github.com/dreamworksanimation/usdmanager" target="_blank" rel="noopener">USD Manager</a> (DreamWorks): browse and edit layers, following references like links.</li>
+          <li><a href="https://github.com/wdas/relationship-viewer" target="_blank" rel="noopener">Relationship Viewer</a> (Disney) and <a href="https://github.com/pablode/usdshadeview" target="_blank" rel="noopener">usdshadeview</a>: see relationships and shading networks as graphs.</li>
+          <li><a href="https://github.com/raph080/ImGuiHydraEditor" target="_blank" rel="noopener">ImGui Hydra Editor</a>: a small C++ editor worth reading as a Hydra example.</li>
+          <li><a href="https://github.com/Activision/USDShellExtension" target="_blank" rel="noopener">USD Shell Extension</a> (Activision): thumbnails and previews in Windows Explorer.</li>
+          <li>usda syntax highlighting: <a href="https://marketplace.visualstudio.com/items?itemName=AnimalLogic.vscode-usda-syntax" target="_blank" rel="noopener">VS Code</a>, <a href="https://github.com/justint/usd-idea" target="_blank" rel="noopener">PyCharm and CLion</a>, <a href="https://github.com/superfunc/usda-syntax" target="_blank" rel="noopener">vim, emacs and Sublime</a>.</li>
+          <li><a href="https://github.com/chadrik/usdstubgen" target="_blank" rel="noopener">usdstubgen</a>: Python type stubs, so your editor completes the <code>pxr</code> API.</li>
+        </ul></div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Converters and robotics</span><span class="m">data exchange</span></summary>
+        <div class="in"><ul>
+          <li><a href="https://github.com/newton-physics/mujoco-usd-converter" target="_blank" rel="noopener">mujoco-usd-converter</a> (Newton): MuJoCo MJCF robots to OpenUSD.</li>
+          <li><a href="https://github.com/noteflowai/robot-reel" target="_blank" rel="noopener">Robot Reel</a>: exports recorded Newton and Genesis simulations to animated USD and checks every time sample against the source.</li>
+          <li><a href="https://github.com/NVIDIA-Omniverse/usd-exchange" target="_blank" rel="noopener">USD Exchange SDK</a> (NVIDIA): helpers for writing correct importers and exporters.</li>
+          <li><a href="https://github.com/adobe/USD-Fileformat-plugins" target="_blank" rel="noopener">Adobe file format plugins</a>: FBX, glTF, OBJ, PLY, SPZ splats and STL readable as layers. Read the source before writing your own in chapter 07.</li>
+          <li><a href="https://github.com/pablode/guc" target="_blank" rel="noopener">guc</a>: glTF to USD with near-lossless MaterialX materials.</li>
+        </ul></div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Other implementations and plugin examples</span><span class="m">weeks 10–12</span></summary>
+        <div class="in"><ul>
+          <li><a href="https://github.com/lighttransport/tinyusdz" target="_blank" rel="noopener">tinyusdz</a> (C++14) and <a href="https://github.com/mxpv/openusd" target="_blank" rel="noopener">openusd</a> (native Rust): independent readers of usda, usdc and usdz. The best references for project 8.</li>
+          <li><a href="https://github.com/apple/SwiftUsd" target="_blank" rel="noopener">SwiftUsd</a> (Apple): OpenUSD as a Swift package.</li>
+          <li><a href="https://github.com/wetadigital/USDPluginExamples" target="_blank" rel="noopener">USD Plugin Examples</a> (Weta) and <a href="https://github.com/NVIDIA-Omniverse/usd-plugin-samples" target="_blank" rel="noopener">USD Plugin Samples</a> (NVIDIA): buildable schema, file format and Hydra plugins.</li>
+          <li><a href="https://github.com/LumaPictures/usd-uri-resolver" target="_blank" rel="noopener">Luma URI Resolver</a> and <a href="https://github.com/westerndigitalcorporation/usd-s3-resolver" target="_blank" rel="noopener">S3 Resolver</a>: real asset resolvers to study. Check which Ar version each targets.</li>
+          <li><a href="https://disneyanimation.com/open-source/usd-notice-framework/" target="_blank" rel="noopener">USD Notice Framework</a> (Disney): manages change notices for interactive tools.</li>
+          <li>Hydra render delegates to read: <a href="https://github.com/Autodesk/arnold-usd" target="_blank" rel="noopener">Arnold</a>, <a href="https://github.com/dreamworksanimation/hdMoonray" target="_blank" rel="noopener">Moonray</a>, <a href="https://github.com/pablode/gatling" target="_blank" rel="noopener">gatling</a>, <a href="https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD" target="_blank" rel="noopener">Radeon ProRender</a>, plus Autodesk's <a href="https://github.com/Autodesk/hydra-viewport-toolbox" target="_blank" rel="noopener">Hydra Viewport Toolbox</a>.</li>
+        </ul></div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">More sample scenes</span><span class="m">practice data</span></summary>
+        <div class="in"><ul>
+          <li><a href="https://openusd.org/release/dl_downloads.html#assets" target="_blank" rel="noopener">Pixar</a>: Kitchen Set, City Set, UsdSkel examples.</li>
+          <li><a href="https://animallogic.com/usd-alab/" target="_blank" rel="noopener">ALab</a> (Animal Logic): a full production asset structure.</li>
+          <li><a href="https://www.disneyanimation.com/resources/moana-island-scene/" target="_blank" rel="noopener">Moana Island Scene</a> (Disney): instancing at film scale.</li>
+          <li><a href="https://github.com/usd-wg/assets" target="_blank" rel="noopener">ASWF USD working group assets</a>: small test assets and asset guidelines.</li>
+          <li><a href="https://github.com/erich666/McUsd" target="_blank" rel="noopener">McUsd</a>: simple geometry with many UsdPreviewSurface materials, for material and light tests.</li>
+          <li><a href="https://www.sidefx.com/contentlibrary/" target="_blank" rel="noopener">SideFX content library</a> and <a href="https://www.lowesopenbuilder.com/" target="_blank" rel="noopener">Lowe's Open Builder</a> (500+ furniture models in usdz).</li>
+        </ul></div>
+      </details>
+
+      <h3>12-week roadmap</h3>
+      <p class="muted">About 6–8 hours a week. Your ticks are saved in this browser.</p>
+      <div class="grid2" id="roadmap"></div>
+    </section>
+
+    <!-- 01 STACK -->
+    <section id="stack">
+      <div class="eyebrow">&lt;/Manual/LibraryStack&gt;</div>
+      <h2>The library stack</h2>
+      <p class="lead">OpenUSD is about 60 libraries in four tiers. Opinions start as specs in Sdf layers, Pcp composes them, Usd serves the resolved stage, schemas give it meaning, and Hydra draws it.</p>
+      <p>Select a library to see what it owns, the types you will touch, and the mistake people make with it. Source lives under <code>pxr/base</code>, <code>pxr/usd</code>, <code>pxr/imaging</code>, <code>pxr/usdImaging</code> and <code>pxr/exec</code>.</p>
+      <div class="arch" id="arch"></div>
+      <div class="detail" id="archDetail" aria-live="polite"></div>
+      <div class="note"><b>Rule of thumb.</b> Write with <code>Sdf</code> when you generate lots of data (it skips composition and runs inside <code>Sdf.ChangeBlock</code>). Read with <code>Usd</code> when you need the truth a user sees. Renderers never read layers; they read what Hydra pulls from the stage.</div>
+    </section>
+
+    <!-- 02 COMPOSITION -->
+    <section id="composition">
+      <div class="eyebrow">&lt;/Manual/Composition&gt;</div>
+      <h2>Composition</h2>
+      <p class="lead">Composition builds one prim index per prim: a tree of nodes, each a layer stack reached through an arc. Opinions are read from the strongest node first. The strength order is LIVERPS.</p>
+      <div class="tbl"><table class="tnum">
+        <thead><tr><th>#</th><th>Letter</th><th>Arc</th><th>One-line purpose</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><b>L</b></td><td>Local (layer stack)</td><td>Opinions in the current layer stack, sublayers included</td></tr>
+          <tr><td>2</td><td><b>I</b></td><td>Inherits</td><td>Broadcast edits from a class to every prim that inherits it</td></tr>
+          <tr><td>3</td><td><b>V</b></td><td>VariantSets</td><td>Switchable branches of opinions</td></tr>
+          <tr><td>4</td><td><b>E</b></td><td>rElocates</td><td>Move namespace that came in through an arc</td></tr>
+          <tr><td>5</td><td><b>R</b></td><td>References</td><td>Bring a prim from another layer into this namespace</td></tr>
+          <tr><td>6</td><td><b>P</b></td><td>Payloads</td><td>References you can unload</td></tr>
+          <tr><td>7</td><td><b>S</b></td><td>Specializes</td><td>A base whose opinions lose to everything else</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Play with strength</h3>
+      <p>Each row is an arc holding an opinion for <code>inputs:roughness</code>. Switch rows off, change values, and watch which one resolves.</p>
+      <div class="card">
+        <div class="play" id="play"></div>
+        <div class="result" id="playResult"></div>
+      </div>
+
+      <h3>Every arc, in depth</h3>
+      <div class="arcs">
+        <div class="arc"><div class="badge">L<small>local</small></div><div class="body">
+          <h4>Local opinions and sublayers</h4>
+          <p>A layer stack is a root layer plus its sublayers, recursively. Earlier entries in <code>subLayers</code> are stronger, and a layer's own opinions beat everything in its sublayers. The session layer sits above the root layer and is never saved with it.</p>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(
+    subLayers = [
+        @./lighting.usda@,                       # strongest
+        @./anim.usda@ (offset = 10; scale = 2),  # retimed: t' = 10 + 2t
+        @./layout.usda@                          # weakest
+    ]
+)</code></pre></div>
+          <ul>
+            <li>Layer offsets compose down the stack: a sample at time <code>t</code> inside <code>anim.usda</code> appears at <code>offset + scale × t</code> on the stage.</li>
+            <li><code>stage.MuteLayer(id)</code> removes a layer's opinions without editing files. Use it to isolate departments while debugging.</li>
+            <li>The layer stack is the unit every other arc targets. A reference to <code>asset.usd</code> brings in <code>asset.usd</code> and all of its sublayers.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">I<small>inherits</small></div><div class="body">
+          <h4>Inherits and class broadcast</h4>
+          <p>A prim that inherits a path receives every opinion authored at that path, in any layer stack along the way. Targets are usually <code>class</code> prims, which stage traversal skips by default.</p>
+<div class="code" data-lang="usda"><pre><code>class "_class_Tree"
+{
+    color3f[] primvars:displayColor = [(0.20, 0.45, 0.20)]
+}
+
+def Xform "Oak_01" (
+    prepend inherits = &lt;/_class_Tree&gt;
+)
+{
+}</code></pre></div>
+          <ul>
+            <li><b>Implied inherits.</b> When a referenced asset inherits a path outside its referenced prim, that path is also looked up in every stronger layer stack. A shot can author <code>class "_class_Tree"</code> and recolor every tree it references, beating the asset's own opinions.</li>
+            <li>Inherit paths inside the referenced prim are remapped through the reference; paths outside it stay global.</li>
+            <li>Each inherit adds nodes to every inheriting prim's index, even when the class is empty. Use them deliberately on large sets.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">V<small>variants</small></div><div class="body">
+          <h4>VariantSets</h4>
+          <p>A variant set is a named group of alternative opinion branches. The selection is itself metadata, so it resolves by strength: the strongest layer that sets <code>variants = { string lod = "…" }</code> decides.</p>
+<div class="code" data-lang="usda"><pre><code>def Xform "Robot" (
+    variants = { string lod = "high" }
+    prepend variantSets = "lod"
+)
+{
+    variantSet "lod" = {
+        "high" (
+            prepend payload = @./geo_high.usdc@
+        ) {
+        }
+        "low" (
+            prepend payload = @./geo_low.usdc@
+        ) {
+        }
+    }
+}</code></pre></div>
+          <ul>
+            <li>Opinions inside a variant are weaker than local opinions on the same prim in the same layer stack. Author everything a variant should control inside the variant only.</li>
+            <li>Variants may hold any arc, including references, payloads and further variant sets. Nested sets are composed in the order selections make available.</li>
+            <li>Author into a variant from Python with <code>with vset.GetVariantEditContext(): …</code> after <code>SetVariantSelection</code>.</li>
+            <li>Fallback selections apply when nothing is authored: <code>Usd.Stage.SetGlobalVariantFallbacks()</code> before opening, or a plugin's <code>plugInfo.json</code>.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">E<small>relocates</small></div><div class="body">
+          <h4>Relocates</h4>
+          <p>Relocates move namespace that arrived through an arc to a new path, without editing the source asset. They are layer metadata. v26.11 removed prim-level relocates from Sdf entirely (composition never used them), so layers with relocates on a prim no longer parse.</p>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(
+    relocates = {
+        &lt;/Char/Rig/Controls/Anim&gt;: &lt;/Char/Anim&gt;
+    }
+)</code></pre></div>
+          <ul>
+            <li>The source path becomes inaccessible; opinions must be authored at the target.</li>
+            <li>Mainly a character-pipeline tool: expose deep rig controls at a stable, short path for animators.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">R<small>references</small></div><div class="body">
+          <h4>References</h4>
+          <p>A reference grafts a prim (and its subtree) from a layer onto the referencing prim. The referenced prim takes the referencing prim's name and path.</p>
+<div class="code" data-lang="usda"><pre><code>def "Chair_01" (
+    prepend references = @./assets/chair.usd@&lt;/Chair&gt;
+)
+{
+    double3 xformOp:translate = (1.2, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+}
+
+over "Chair_02" (
+    prepend references = &lt;/Chair_01&gt;   # internal reference, same layer stack
+)
+{
+}</code></pre></div>
+          <ul>
+            <li>No prim path means the target layer's <code>defaultPrim</code>. Set it on every asset.</li>
+            <li>References are encapsulated: they bring the target prim's subtree, not its ancestors' opinions or root-level siblings.</li>
+            <li>Arcs are list-ops: <code>prepend</code>, <code>append</code>, <code>delete</code>, or an explicit list that replaces weaker ones.</li>
+            <li>Asset paths anchor to the layer they are written in, never to the stage.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">P<small>payloads</small></div><div class="body">
+          <h4>Payloads</h4>
+          <p>Payloads compose like references, one strength level weaker, and can be left unloaded. That makes them the boundary between a cheap asset interface and its heavy data.</p>
+<div class="code" data-lang="python"><pre><code>from pxr import Usd
+stage = Usd.Stage.Open("set.usda", Usd.Stage.LoadNone)   # nothing heavy yet
+robot = stage.GetPrimAtPath("/Set/Robot_01")
+print(robot.HasPayload(), robot.IsLoaded())               # True False
+stage.Load(robot.GetPath())                               # load one subtree
+rules = stage.GetLoadRules()                              # or edit rules wholesale
+rules.LoadWithoutDescendants("/Set")
+stage.SetLoadRules(rules)</code></pre></div>
+          <ul>
+            <li>An unloaded payload hides everything inside it. The prim still shows what is authored above the payload: kind, <code>assetInfo</code>, variant sets, <code>extentsHint</code>.</li>
+            <li>Put the payload on the component root, and keep variant selections and transforms outside it so layout can work unloaded.</li>
+          </ul>
+        </div></div>
+
+        <div class="arc"><div class="badge">S<small>specializes</small></div><div class="body">
+          <h4>Specializes</h4>
+          <p>Specializes behaves like inherits, except the base's opinions lose to every other opinion on the specializing prim, from any layer stack. Refinements survive changes to the base.</p>
+<div class="code" data-lang="usda"><pre><code>def Material "Metal"
+{
+    float inputs:roughness = 0.4
+}
+
+def Material "RustyMetal" (
+    prepend specializes = &lt;/Looks/Metal&gt;
+)
+{
+    float inputs:roughness = 0.8   # always beats edits to Metal, even from a shot
+}</code></pre></div>
+          <ul>
+            <li>Use it for material libraries and "same as X, except" variations.</li>
+            <li>Compare with inherits in puzzle 6 below: the same shot edit wins with inherits and loses with specializes.</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <h3>Rules that apply to every arc</h3>
+      <ul>
+        <li><b>Recursion.</b> Inside every arc target, LIVERPS applies again. A whole stronger subtree beats a whole weaker one.</li>
+        <li><b>Ancestral arcs.</b> An arc on <code>/Set</code> also contributes opinions to <code>/Set/Chair</code>. Ancestral opinions are weaker than arcs authored directly on the descendant of the same type.</li>
+        <li><b>Expression variables.</b> <code>expressionVariables = { string SHOT = "s010" }</code> in layer metadata, and <code>@`"./shots/${SHOT}/anim.usda"`@</code> in sublayers, references, payloads, asset attributes and variant selections. One template layer then serves every shot. From v26.11 a variable can carry a quoted fallback: <code>${SHOT:'s000'}</code>.</li>
+        <li><b>Value clips</b> are not an arc. They stream time samples from many files and resolve just below the layer that declares them.</li>
+      </ul>
+
+      <h3>Nine puzzles</h3>
+      <p>Predict the result before revealing it. If you can explain every answer, you are ready for the composition questions on the exam.</p>
+      <div class="puzzles" id="puzzles"></div>
+    </section>
+
+    <!-- 03 RESOLUTION -->
+    <section id="resolution">
+      <div class="eyebrow">&lt;/Manual/ValueResolution&gt;</div>
+      <h2>Value resolution &amp; debugging</h2>
+      <p class="lead">Composition decides which opinions exist and in what order. Value resolution walks that order and returns one value per property per time.</p>
+
+      <h3>The algorithm for an attribute at time t</h3>
+      <ol>
+        <li>Walk the prim index nodes strongest to weakest, and within each node its layers strongest to weakest.</li>
+        <li>Stop at the first layer holding a value source for the property: a spline or time samples (these beat a default in the same layer), a default, or value clips declared there (clips sit just below that layer's own opinions).</li>
+        <li>Time samples interpolate linearly by default (<code>stage.SetInterpolationType(Usd.InterpolationTypeHeld)</code> switches to held). Before the first sample you get the first value; after the last, the last. Non-numeric types are always held.</li>
+        <li>A value block (<code>= None</code>) stops the walk: the attribute reports no authored value.</li>
+        <li>No opinion anywhere: the schema's fallback from the prim definition, or nothing.</li>
+      </ol>
+      <div class="note"><b>Consequence people miss.</b> A default in a stronger layer beats time samples in a weaker layer. An animator's curve vanishes when someone authors a static value in lighting.</div>
+
+      <h3>Everything else that resolves</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Data</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td>Most metadata (<code>kind</code>, <code>active</code>, <code>instanceable</code>, <code>documentation</code>)</td><td>Strongest opinion wins</td></tr>
+          <tr><td>Dictionaries (<code>customData</code>, <code>assetInfo</code>)</td><td>Merged key by key, strongest wins per key</td></tr>
+          <tr><td>List-ops (<code>references</code>, <code>apiSchemas</code>, relationship targets, connections)</td><td>Combined weakest to strongest: prepend, append, delete, or an explicit list that resets</td></tr>
+          <tr><td>Specifier</td><td><code>def</code> or <code>class</code> from the strongest defining layer; a prim with only <code>over</code>s is not defined and is skipped by default traversal</td></tr>
+          <tr><td>Variant selection</td><td>Strongest selection, then the global fallback, then none</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Debugging playbook</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Symptom</th><th>Usual cause</th><th>Check</th></tr></thead>
+        <tbody>
+          <tr><td>Prim missing</td><td>Payload unloaded, <code>active = false</code> in a stronger layer, population mask, only <code>over</code>s, wrong <code>defaultPrim</code></td><td class="wrap"><code>prim.IsActive()</code>, <code>IsLoaded()</code>, <code>IsDefined()</code>; usdview Layer Stack tab</td></tr>
+          <tr><td>Value wrong</td><td>A stronger opinion somewhere</td><td class="wrap"><code>attr.GetPropertyStack(t)</code>, <code>attr.GetResolveInfo(t)</code></td></tr>
+          <tr><td>Edits don't stick</td><td>Edit target is a weaker layer; editing an instance proxy; editing a variant without its edit context</td><td class="wrap"><code>stage.GetEditTarget()</code>, <code>prim.IsInstanceProxy()</code></td></tr>
+          <tr><td>Textures or sublayers missing</td><td>Anchoring, search paths, resolver context</td><td class="wrap"><code>usdresolve</code>, <code>UsdUtils.ComputeAllDependencies()</code></td></tr>
+          <tr><td>Scene sideways or 100× too big</td><td><code>upAxis</code> or <code>metersPerUnit</code> mismatch</td><td class="wrap"><code>UsdGeom.GetStageUpAxis()</code>, <code>GetStageMetersPerUnit()</code></td></tr>
+          <tr><td>Instancing not saving memory</td><td>Per-instance differences in arcs or variant selections create separate prototypes</td><td class="wrap"><code>len(stage.GetPrototypes())</code></td></tr>
+          <tr><td>Wrong material in another app</td><td>Purpose-specific bindings, collection binding strength, MaterialX vs UsdPreviewSurface</td><td class="wrap"><code>MaterialBindingAPI.ComputeBoundMaterial()</code></td></tr>
+          <tr><td>Slow stage open</td><td>Huge .usda text, no payloads, thousands of arcs</td><td class="wrap"><code>TF_DEBUG=USD_STAGE_OPEN</code>, Trace, convert to .usdc</td></tr>
+        </tbody>
+      </table></div>
+
+<div class="code" data-lang="python"><pre><code>from pxr import Usd
+
+stage = Usd.Stage.Open("shot.usda")
+prim = stage.GetPrimAtPath("/World/Robot")
+
+# 1. Which arcs built this prim, strongest first?
+query = Usd.PrimCompositionQuery(prim)
+for arc in query.GetCompositionArcs():
+    layer = arc.GetTargetLayer()
+    print(arc.GetArcType(), layer.identifier if layer else "-", arc.GetTargetPrimPath())
+
+# 2. Full prim index, as Pcp sees it
+print(prim.GetPrimIndex().DumpToString())
+
+# 3. Who wins this attribute at frame 12, and from where?
+attr = prim.GetAttribute("xformOp:translate")
+info = attr.GetResolveInfo(Usd.TimeCode(12))
+print(info.GetSource())            # Default, TimeSamples, ValueClips, Spline, Fallback, None
+for spec in attr.GetPropertyStack(Usd.TimeCode(12)):
+    print("  ", spec.layer.identifier, spec.path)</code></pre></div>
+
+      <h3>TF_DEBUG codes worth knowing</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Code</th><th>Shows</th></tr></thead>
+        <tbody>
+          <tr><td><code>PCP_PRIM_INDEX</code></td><td>Prim index computation, arc by arc</td></tr>
+          <tr><td><code>USD_STAGE_OPEN</code></td><td>Stage open timing and steps</td></tr>
+          <tr><td><code>USD_PAYLOADS</code></td><td>Payload load and unload decisions</td></tr>
+          <tr><td><code>AR_RESOLVER_INIT</code></td><td>Which resolver was chosen and why</td></tr>
+          <tr><td><code>PLUG_INFO_SEARCH</code>, <code>PLUG_LOAD</code></td><td>Where plugInfo.json files were searched and which libraries loaded</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted">Set as <code>TF_DEBUG="PCP_PRIM_INDEX USD_PAYLOADS"</code>, or list every code from Python with <code>Tf.Debug.GetDebugSymbolNames()</code>.</p>
+    </section>
+
+    <!-- 04 SCHEMAS -->
+    <section id="schemas">
+      <div class="eyebrow">&lt;/Manual/Schemas&gt;</div>
+      <h2>Schemas through v26.11</h2>
+      <p class="lead">A schema is a prim definition: properties, fallbacks and documentation that tools agree on. Typed schemas say what a prim is; API schemas add a capability to any prim.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Kind</th><th>Example</th><th>How it lands on a prim</th></tr></thead>
+        <tbody>
+          <tr><td>Concrete typed (IsA)</td><td><code>Mesh</code>, <code>Camera</code>, <code>Material</code></td><td><code>def Mesh "Body"</code></td></tr>
+          <tr><td>Abstract typed</td><td><code>Gprim</code>, <code>Xformable</code>, <code>Imageable</code></td><td>Inherited by concrete types; never in a <code>def</code></td></tr>
+          <tr><td>Single-apply API</td><td><code>MaterialBindingAPI</code>, <code>RigidBodyAPI</code></td><td><code>prepend apiSchemas = ["MaterialBindingAPI"]</code></td></tr>
+          <tr><td>Multiple-apply API</td><td><code>CollectionAPI</code>, <code>BackPlateAPI</code>, <code>SemanticsLabelsAPI</code></td><td>Applied with an instance name: <code>"CollectionAPI:lightLink"</code></td></tr>
+          <tr><td>Auto-apply API</td><td>Declared by a plugin for given types</td><td>Applied without authoring; shows up in <code>prim.GetAppliedSchemas()</code></td></tr>
+          <tr><td>Versioned family</td><td><code>Cylinder_1</code>, <code>Capsule_1</code></td><td>New version of a schema without breaking old files</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>New in 2026</h3>
+      <details class="acc" open>
+        <summary><span class="h">What v26.11 changed</span><span class="m">Oct 20, 2026 · patch 26.11.1 Oct 21</span></summary>
+        <div class="in">
+          <p>The newest release, from its changelog. Items marked "breaks" can stop older files or code from working.</p>
+          <div class="tbl"><table>
+            <thead><tr><th>Area</th><th>Change</th></tr></thead>
+            <tbody>
+              <tr><td>Security (breaks)</td><td><code>.usd</code>/<code>.usdc</code> crate files older than version 0.4.0 are rejected at read time; 0.4.0 up to 0.8.0 still read with a warning. Upgrade old files with <code>usdupdatecrate</code>. Command-injection holes in <code>usdview</code> and <code>usdedit</code> are fixed, so upgrade before opening untrusted layers.</td></tr>
+              <tr><td>Build (breaks)</td><td>Moved to VFX Reference Platform 2025: oneTBB by default, newer OpenVDB, OpenImageIO, OpenColorIO, Alembic, Qt and OpenEXR. Python 3.9 and 3.10 are dropped, so use 3.11 or newer. PySide2 is deprecated. Linux aarch64 wheels are now published.</td></tr>
+              <tr><td>Syntax (breaks)</td><td>Prim-level relocates are removed from Sdf; such layers no longer parse. A UTF-8 byte order mark in a .usda file is now an error. The <code>add</code> list-op is long deprecated: write <code>append</code>.</td></tr>
+              <tr><td>Composition</td><td>10–30% faster composing production sets; relationship and connection targets compose about 20% faster. Prototype assignment is repeatable across runs with <code>USD_ASSIGN_PROTOTYPES_DETERMINISTICALLY</code>.</td></tr>
+              <tr><td>Expressions</td><td>Variable expressions take a fallback: <code>${SHOT:'s000'}</code>. The fallback must be a quoted literal or a number; <code>${SHOT:s000}</code> is an error.</td></tr>
+              <tr><td>Math</td><td><code>GfVec</code> gains <code>x</code>, <code>y</code>, <code>z</code>, <code>w</code> and swizzles (<code>v.xy</code> in Python, <code>v.xyz()</code> in C++). New <code>GfDuration</code>: a length of time that layer offsets scale but do not shift.</td></tr>
+              <tr><td>New schemas</td><td><code>AuthorshipAPI</code> (UsdMedia, multiple-apply): creator, copyright owner, created date, description per subtree, summarized by the new <code>usdauthors</code> tool. <code>HydraPrimAPI</code> with <code>hydra:expandInstances</code> to expand scenegraph instances for debugging.</td></tr>
+              <tr><td>Mesh compression</td><td>Polygonal Mesh Coding (PMC) from the Alliance for Open Media: a decoding file format plugin and a <code>usdcrush</code> encoder tool.</td></tr>
+              <tr><td>Backplates</td><td>Color properties renamed from <code>luma:gain</code>/<code>lift</code>/<code>gamma</code> to <code>luma:slope</code>/<code>offset</code>/<code>power</code>. Storm now draws plates with color grading, animated and unlit materials.</td></tr>
+              <tr><td>Schema authoring</td><td><code>apiSchemaCanOnlyApplyTo</code> can name API schemas (and a specific instance) as well as prim types.</td></tr>
+              <tr><td>Physics</td><td>A body with <code>physics:rigidBodyEnabled = false</code> is treated as if <code>RigidBodyAPI</code> were not applied; its colliders belong to the nearest enabled ancestor body, or are static.</td></tr>
+              <tr><td>Hydra</td><td>Prim IDs come from a filtering scene index, <code>HdsiPrimIdSceneIndex</code>, not the render index. <code>HdCreateOverlayContainerDataSource</code> is the new way to overlay data sources. Apps can pass <code>sceneIndexCreateArgs</code> to plugin scene indices. A <code>particleField</code> Hydra schema carries splat kernels. Storm draws native cones, cylinders and capsules behind <code>HDST_ENABLE_NATIVE_IMPLICITS</code>.</td></tr>
+              <tr><td>RenderMan</td><td>MaterialX standard_surface and OpenPBR render natively in XPU.</td></tr>
+              <tr><td>OpenExec</td><td>No longer loaded by imaging unless <code>USDIMAGINGGL_ENGINE_ENABLE_EXEC_SCENE_INDEX=1</code>. Spline "inner looping" is deprecated.</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </details>
+      <details class="acc" open>
+        <summary><span class="h">Gaussian splats: ParticleField3DGaussianSplat</span><span class="m">v26.03 · UsdVol</span></summary>
+        <div class="in">
+          <p>3D Gaussian Splatting data is a first-class prim. <code>ParticleField</code> is the base prim; per-particle data comes from attribute API schemas, each with a float and a half-precision attribute (consumers prefer float when both exist). On <code>ParticleField3DGaussianSplat</code> all of them, plus the GaussianEllipsoid kernel, are built in: you author the attributes directly, with no <code>apiSchemas</code> line.</p>
+          <div class="tbl"><table>
+            <thead><tr><th>Piece</th><th>Attributes / values</th></tr></thead>
+            <tbody>
+              <tr><td>ParticleFieldPositionAttributeAPI</td><td><code>point3f[] positions</code>, <code>point3h[] positionsh</code>; the length sets the particle count</td></tr>
+              <tr><td>ParticleFieldOrientationAttributeAPI</td><td><code>quatf[] orientations</code>, <code>quath[] orientationsh</code></td></tr>
+              <tr><td>ParticleFieldScaleAttributeAPI</td><td><code>float3[] scales</code>, <code>half3[] scalesh</code>: affine scale of each particle's kernel</td></tr>
+              <tr><td>ParticleFieldOpacityAttributeAPI</td><td><code>float[] opacities</code>, <code>half[] opacitiesh</code>: linear 0–1; missing data means fully opaque (1.0)</td></tr>
+              <tr><td>ParticleFieldSphericalHarmonicsAttributeAPI</td><td class="wrap"><code>float3[] radiance:sphericalHarmonicsCoefficients</code> (+ <code>…h</code>), <code>int radiance:sphericalHarmonicsDegree</code> = 3. Degree N stores (N+1)² coefficients per particle, contiguous per particle. Missing data falls back to a grey DC term (0.5, 0.5, 0.5).</td></tr>
+              <tr><td>Kernel APIs</td><td>GaussianEllipsoid, GaussianSurflet, ConstantSurflet</td></tr>
+              <tr><td><code>projectionModeHint</code></td><td><code>perspective</code> (default) or <code>tangential</code></td></tr>
+              <tr><td><code>sortingModeHint</code></td><td><code>zDepth</code> (default), <code>cameraDistance</code>, <code>rayHitDistance</code></td></tr>
+            </tbody>
+          </table></div>
+          <p>Arrays longer than the particle count are truncated; shorter ones are ignored. Renderers may ignore both hints. The reference renderer is <code>hdParticleField</code>.</p>
+<div class="code" data-lang="usda"><pre><code>def ParticleField3DGaussianSplat "Capture"
+{
+    point3f[] positions = [(0, 0, 0), (0.1, 0, 0)]
+    quatf[] orientations = [(1, 0, 0, 0), (1, 0, 0, 0)]
+    float3[] scales = [(0.01, 0.01, 0.01), (0.02, 0.01, 0.01)]
+    float[] opacities = [0.9, 0.6]
+    int radiance:sphericalHarmonicsDegree = 0          # 1 coefficient per particle
+    float3[] radiance:sphericalHarmonicsCoefficients = [(0.8, 0.2, 0.2), (0.2, 0.2, 0.8)]
+}</code></pre></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Multiple level of detail: UsdLod</span><span class="m">v26.08</span></summary>
+        <div class="in">
+          <p>A standard way to author detail levels and let the runtime choose, without editing the scenegraph or using variants.</p>
+          <p>In usda the names are all-caps <code>LOD</code>; C++ classes are <code>UsdLodRootAPI</code> and so on.</p>
+          <ul>
+            <li><code>LODRootAPI</code> marks the root: <code>rel lod:heuristics</code> and <code>int lod:default:index</code> (fallback 0). The root's children are the levels by index: <code>LOD0</code> (most detail), <code>LOD1</code>, <code>LOD2</code>.</li>
+            <li>Heuristics are prims: <code>LODDistanceHeuristic</code> (<code>center</code>) and <code>LODScreenSizeHeuristic</code> (<code>extent</code>, <code>projectionMethod</code> = <code>projectedSphere</code>). Both take uniform <code>thresholds</code>, <code>blendThresholds</code>, a <code>boundingVolume</code> rel and a <code>lod:domain</code> token.</li>
+            <li><code>LODOverrideAPI</code> forces a level: <code>token lod:override:mode</code> (fallback <code>inherited</code>) and <code>float lod:override:index</code>. The index is a float, so fractional values express cross-fades.</li>
+            <li>Selection order: override, then each heuristic in turn, then the default index.</li>
+            <li>The schemas only describe the levels. Each renderer must implement the selection, and the changelog says Hydra support is still under development.</li>
+          </ul>
+<div class="code" data-lang="usda"><pre><code>def Xform "Tree" (
+    prepend apiSchemas = ["LODRootAPI"]
+)
+{
+    rel lod:heuristics = &lt;/Tree/ByDistance&gt;
+
+    def LODDistanceHeuristic "ByDistance"
+    {
+        uniform float[] thresholds = [10, 40]    # LOD0 under 10, LOD1 under 40, else LOD2
+    }
+
+    def Xform "LOD0"
+    {
+    }
+
+    def Xform "LOD1"
+    {
+    }
+
+    def Xform "LOD2"
+    {
+    }
+}</code></pre></div>
+          <p class="muted">Variants are still right when a person chooses the representation. UsdLod is for runtime selection.</p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Backplates: BackPlateAPI</span><span class="m">v26.08 · UsdGeom</span></summary>
+        <div class="in">
+          <p>A multiple-apply API on a camera (C++ <code>UsdGeomBackPlateAPI</code>) describing images composited behind geometry: match moves, set extensions, photogrammetry frames, or machine-vision readings paired with a camera track. Each instance name gets its own <code>backPlate:&lt;name&gt;:</code> properties.</p>
+          <div class="tbl"><table>
+            <thead><tr><th>Property (after <code>backPlate:&lt;name&gt;:</code>)</th><th>Type · fallback</th></tr></thead>
+            <tbody>
+              <tr><td><code>image</code>, <code>alpha:image</code>, <code>depth:image</code></td><td>asset · empty</td></tr>
+              <tr><td><code>plateVisibility</code></td><td>token · <code>solo</code></td></tr>
+              <tr><td><code>luma:slope</code>, <code>luma:offset</code>, <code>luma:power</code></td><td>float3 · (1,1,1), (0,0,0), (1,1,1); output = (input × slope + offset)<sup>power</sup></td></tr>
+              <tr><td><code>translate:tweak</code>, <code>rotateXYZ:tweak</code></td><td>float3 · zeros</td></tr>
+              <tr><td><code>scale:tweak</code></td><td>float2 · (1, 1)</td></tr>
+              <tr><td><code>depth:cameraSpaceOffset</code>, <code>depth:minOffset</code>, <code>depth:normalizingFactor</code></td><td>float · 0, 0, 1</td></tr>
+            </tbody>
+          </table></div>
+<div class="code" data-lang="usda"><pre><code>def Camera "ShotCam" (
+    prepend apiSchemas = ["BackPlateAPI:plate", "BackPlateAPI:foreground"]
+)
+{
+    asset backPlate:plate:image = @./plates/s010.####.exr@
+    asset backPlate:foreground:image = @./plates/s010_fg.####.exr@
+    asset backPlate:foreground:alpha:image = @./plates/s010_fg_matte.####.exr@
+}</code></pre></div>
+          <p>Several instances give multi-plane parallax (foreground card, mid-ground, far plate).</p>
+          <div class="note"><b>Version matters.</b> In v26.08 the color properties were <code>luma:gain</code>, <code>luma:lift</code> and <code>luma:gamma</code>; v26.11 renamed them, so files authored for 26.08 need updating. Storm draws plates with color grading from v26.11.</div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">Profiles and capabilities</span><span class="m">v26.08</span></summary>
+        <div class="in">
+          <p>Profiles answer "can this tool faithfully open, edit and round-trip this asset?" A capability is a reverse-domain identifier such as <code>usd.geom.skel</code> or <code>usd.image.jpeg</code>. Capabilities form a graph: <code>usd.image.jpeg</code> implies <code>usd.image</code>. A profile is a named set of them.</p>
+          <ul>
+            <li>Three domains: layer (encodings, compression), prim (schema features such as skinning), application (physics simulation, an import path).</li>
+            <li>The applied schema is <code>ClaimsAPI</code> (C++ <code>UsdProfilesClaimsAPI</code>, library <code>usdProfiles</code>). The release blog calls it a "ProfileAPI", but no schema by that name exists. It stores everything in the prim's <code>customData["profilesInfo"]</code>: <code>capabilityUsages</code> (capability → <code>hard</code>, <code>soft</code> or <code>enhancement</code>, written by the DCC) and <code>profileCompatibility</code> (profile → list of excepted capabilities, written by a pipeline audit).</li>
+            <li><code>PopulateCapabilityUsages()</code> walks descendants and records the capabilities implied by applied schemas and layer file formats; <code>IsCompatibleWith(profile)</code> answers the compatibility question, honoring exceptions.</li>
+            <li>Schemas imply capabilities through plugin metadata (<code>usdGenSchema</code> accepts arrays in <code>extraPlugInfo</code>). <code>usdchecker</code> support is planned.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">OpenExec</span><span class="m">v25.08 → v26.03</span></summary>
+        <div class="in">
+          <p>An execution framework for computations defined by schemas, so behavior such as rigging can live in USD. v26.03 added <code>IrFkController</code>, the first step toward invertible rigging. Watch it; do not build production on it yet.</p>
+        </div>
+      </details>
+
+      <h3>Core domains</h3>
+      <details class="acc">
+        <summary><span class="h">UsdGeom</span><span class="m">space, meshes, primvars</span></summary>
+        <div class="in">
+          <ul>
+            <li><b>Stage metrics.</b> <code>upAxis</code> falls back to Y and <code>metersPerUnit</code> to 0.01. Set both on every root layer.</li>
+            <li><b>Transforms.</b> <code>xformOpOrder</code> lists ops applied right to left in matrix terms; <code>!resetXformStack!</code> ignores parent transforms. Gf matrices are row-major and points multiply as <code>v × M</code>.</li>
+            <li><b>Mesh.</b> <code>points</code>, <code>faceVertexCounts</code>, <code>faceVertexIndices</code>, <code>normals</code>. <code>subdivisionScheme</code> defaults to <code>catmullClark</code>: set <code>"none"</code> for polygonal assets or they render smoothed.</li>
+            <li><b>GeomSubset</b> with <code>familyName = "materialBind"</code> assigns materials per face.</li>
+            <li><b>Imageable.</b> <code>visibility</code> (<code>inherited</code>/<code>invisible</code>), <code>purpose</code> (<code>default</code>, <code>render</code>, <code>proxy</code>, <code>guide</code>), <code>proxyPrim</code>.</li>
+            <li><b>Boundable.</b> Author <code>extent</code> on gprims; <code>UsdGeom.BBoxCache</code> computes bounds fast.</li>
+            <li><b>Cameras.</b> Focal length and apertures are in tenths of a scene unit (millimetres at the default centimetre scale).</li>
+          </ul>
+          <div class="tbl"><table>
+            <thead><tr><th>Primvar interpolation</th><th>Values per</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td><code>constant</code></td><td>1 for the prim</td><td>Object ID</td></tr>
+              <tr><td><code>uniform</code></td><td>Face</td><td>Face material index</td></tr>
+              <tr><td><code>vertex</code></td><td>Point, subdivision-aware</td><td>Skin weights, per-point color</td></tr>
+              <tr><td><code>varying</code></td><td>Point, linear</td><td>Rarely needed on meshes</td></tr>
+              <tr><td><code>faceVarying</code></td><td>Face-vertex corner</td><td>UVs (<code>texCoord2f[] primvars:st</code>), hard normals</td></tr>
+            </tbody>
+          </table></div>
+          <p>Primvars can be indexed (<code>primvars:st:indices</code>) and constant primvars inherit down the namespace.</p>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">UsdShade + MaterialX + OpenPBR</span><span class="m">materials</span></summary>
+        <div class="in">
+          <ul>
+            <li>A <code>Material</code> exposes terminals per render context: <code>outputs:surface</code> (universal), <code>outputs:mtlx:surface</code>, <code>outputs:ri:surface</code>.</li>
+            <li><code>Shader</code> prims name their implementation with <code>info:id</code>; connections are <code>.connect</code> paths; <code>NodeGraph</code>s expose an interface of <code>inputs:</code>.</li>
+            <li>Binding: <code>material:binding</code> relationship (via <code>MaterialBindingAPI</code>), purpose-specific <code>material:binding:full</code> / <code>:preview</code>, and collection bindings. <code>bindMaterialAs = "strongerThanDescendants"</code> overrides child bindings.</li>
+            <li>Portability ladder: UsdPreviewSurface everywhere, MaterialX standard_surface or OpenPBR in production renderers, MDL in Omniverse.</li>
+          </ul>
+<div class="code" data-lang="usda"><pre><code>def Material "Painted"
+{
+    token outputs:surface.connect = &lt;/Looks/Painted/Surface.outputs:surface&gt;
+
+    def Shader "Surface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor.connect = &lt;/Looks/Painted/Albedo.outputs:rgb&gt;
+        float inputs:roughness = 0.45
+        token outputs:surface
+    }
+
+    def Shader "Albedo"
+    {
+        uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @./textures/albedo.&lt;UDIM&gt;.png@
+        float2 inputs:st.connect = &lt;/Looks/Painted/UV.outputs:result&gt;
+        float3 outputs:rgb
+    }
+
+    def Shader "UV"
+    {
+        uniform token info:id = "UsdPrimvarReader_float2"
+        string inputs:varname = "st"
+        float2 outputs:result
+    }
+}</code></pre></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">UsdLux</span><span class="m">lights</span></summary>
+        <div class="in">
+          <ul>
+            <li>Concrete lights: <code>DistantLight</code>, <code>RectLight</code>, <code>SphereLight</code>, <code>DiskLight</code>, <code>CylinderLight</code>, <code>DomeLight</code>, <code>PortalLight</code>; any geometry can emit via <code>MeshLightAPI</code>.</li>
+            <li>Brightness is <code>inputs:intensity × 2^inputs:exposure</code>; <code>inputs:normalize</code> makes it independent of light size.</li>
+            <li>Light and shadow linking use the <code>lightLink</code> and <code>shadowLink</code> collections on the light.</li>
+            <li>Dome lights: <code>inputs:texture:file</code> with <code>inputs:texture:format = "latlong"</code>.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">UsdSkel</span><span class="m">characters</span></summary>
+        <div class="in">
+          <ul>
+            <li>A <code>SkelRoot</code> scopes skinning. Inside: a <code>Skeleton</code> (<code>joints</code> as token paths, <code>bindTransforms</code>, <code>restTransforms</code>) and skinned meshes.</li>
+            <li>Meshes apply <code>SkelBindingAPI</code>: <code>primvars:skel:jointIndices</code>, <code>primvars:skel:jointWeights</code> (with an <code>elementSize</code> of influences per point), <code>skel:skeleton</code>, <code>primvars:skel:geomBindTransform</code>.</li>
+            <li><code>SkelAnimation</code> holds <code>translations</code>, <code>rotations</code> (quatf), <code>scales</code>, <code>blendShapes</code> and <code>blendShapeWeights</code>; the skeleton points at it with <code>skel:animationSource</code>.</li>
+            <li>Joint indices refer to the skeleton's <code>joints</code> order unless the mesh overrides it with <code>skel:joints</code>. Most broken imports are an ordering mismatch.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">UsdPhysics</span><span class="m">simulation, robotics</span></summary>
+        <div class="in">
+          <ul>
+            <li><code>PhysicsScene</code> (gravity), <code>RigidBodyAPI</code>, <code>CollisionAPI</code> + <code>MeshCollisionAPI</code> (approximation), <code>MassAPI</code> (mass, density, center of mass, inertia), <code>MaterialAPI</code> (friction, restitution).</li>
+            <li>Joints: <code>RevoluteJoint</code>, <code>PrismaticJoint</code>, <code>SphericalJoint</code>, <code>FixedJoint</code>, <code>DistanceJoint</code>, with <code>physics:body0</code>/<code>body1</code> and local frames; limits and drives are multiple-apply (<code>LimitAPI:angular</code>, <code>DriveAPI:angular</code>).</li>
+            <li><code>ArticulationRootAPI</code> marks a reduced-coordinate articulation (robot arms). <code>CollisionGroup</code> and <code>FilteredPairsAPI</code> control contacts.</li>
+            <li>Isaac Sim is USD-native on these schemas; other engines import them, so they are the portable robot description.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="acc">
+        <summary><span class="h">UsdRender, UsdVol, UsdMedia, UsdProc</span><span class="m">the rest</span></summary>
+        <div class="in">
+          <ul>
+            <li><b>UsdRender.</b> <code>RenderSettings</code> (resolution, camera, products), <code>RenderProduct</code> (output file, ordered vars), <code>RenderVar</code> (an AOV by source name). This is how synthetic-data passes stay renderer-neutral.</li>
+            <li><b>UsdVol.</b> <code>Volume</code> with <code>OpenVDBAsset</code> fields bound by name, plus the particle fields above.</li>
+            <li><b>UsdMedia.</b> <code>SpatialAudio</code>, asset previews, and from v26.11 <code>AuthorshipAPI</code> for who made a subtree and with what tools.</li>
+            <li><b>UsdProc.</b> <code>GenerativeProcedural</code> prims that a Hydra procedural plugin expands at render time.</li>
+            <li><b>UsdSemantics.</b> <code>SemanticsLabelsAPI</code> is multiple-apply, one instance per taxonomy: <code>prepend apiSchemas = ["SemanticsLabelsAPI:class"]</code> and <code>token[] semantics:labels:class = ["forklift", "vehicle"]</code>. This is the standard place for segmentation class labels.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <!-- 05 ASSETS -->
+    <section id="assets">
+      <div class="eyebrow">&lt;/Manual/AssetStructure&gt;</div>
+      <h2>Asset structure</h2>
+      <p class="lead">A scalable pipeline is mostly convention: a cheap asset interface, a payload boundary, a contiguous kind hierarchy and one layer per department.</p>
+
+      <h3>The asset interface</h3>
+      <p>Everything a downstream user needs without loading geometry lives above the payload: <code>defaultPrim</code>, kind, <code>assetInfo</code>, variant sets, <code>extentsHint</code> and a proxy purpose if you have one.</p>
+<div class="code" data-lang="text"><pre><code>robot/
+  robot.usd        interface: defaultPrim, kind, assetInfo, variant sets, payload
+  payload.usd      sublayers geo + mtl (only loaded on demand)
+  geo.usdc         meshes, primvars, render/proxy purposes
+  mtl.usda         materials and bindings (small, diff-friendly text)
+  textures/</code></pre></div>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(
+    defaultPrim = "Robot"
+    upAxis = "Z"
+    metersPerUnit = 1
+)
+
+def Xform "Robot" (
+    kind = "component"
+    assetInfo = {
+        asset identifier = @./robot.usd@
+        string name = "Robot"
+        string version = "v012"
+    }
+    prepend apiSchemas = ["GeomModelAPI"]
+    prepend payload = @./payload.usd@
+)
+{
+    float3[] extentsHint = [(-0.4, -0.4, 0), (0.4, 0.4, 1.8)]
+}</code></pre></div>
+
+      <h3>Kinds and the model hierarchy</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Kind</th><th>Meaning</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td><code>assembly</code></td><td>A set or environment built from other models</td><td>Its ancestors are groups or assemblies</td></tr>
+          <tr><td><code>group</code></td><td>Organizing container</td><td>Ancestors are groups or assemblies</td></tr>
+          <tr><td><code>component</code></td><td>A leaf, publishable asset</td><td>No model kinds below it</td></tr>
+          <tr><td><code>subcomponent</code></td><td>An addressable part inside a component</td><td>Not a model; marks interesting parts</td></tr>
+        </tbody>
+      </table></div>
+      <p>The hierarchy must be contiguous from the root, which lets tools prune traversal at component level (<code>Usd.PrimRange</code> with <code>Usd.PrimIsModel</code>). Add studio kinds through <code>plugInfo.json</code>.</p>
+
+      <h3>Department layers in a shot</h3>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(
+    subLayers = [
+        @./shot_s010_lighting.usda@,   # lighting wins over everything below
+        @./shot_s010_fx.usda@,
+        @./shot_s010_anim.usda@,
+        @./shot_s010_layout.usda@,     # references assets, places them
+        @../seq/seq_common.usda@       # sequence-wide defaults
+    ]
+    expressionVariables = { string SHOT = "s010" }
+)</code></pre></div>
+      <p>Each department writes only its own layer. Downstream departments are stronger, so lighting can fix anything without touching animation's file.</p>
+
+      <h3>Instancing: which kind</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Scenegraph instancing</th><th>PointInstancer</th></tr></thead>
+        <tbody>
+          <tr><td>Author</td><td><code>instanceable = true</code> on prims with identical arcs</td><td>One prim: <code>prototypes</code> rel, <code>protoIndices</code>, <code>positions</code>, <code>orientations</code> (quath), <code>scales</code>, <code>velocities</code>, <code>ids</code>, <code>invisibleIds</code></td></tr>
+          <tr><td>Scale</td><td>Hundreds to tens of thousands</td><td>Millions</td></tr>
+          <tr><td>Per-instance edits</td><td>Instance proxies are read-only; vary through different variant selections (new prototype) or by de-instancing</td><td>Only what the arrays carry, plus <code>invisibleIds</code> masking</td></tr>
+          <tr><td>Each instance is</td><td>A real prim path you can select</td><td>An index into arrays</td></tr>
+          <tr><td>Inspect</td><td><code>stage.GetPrototypes()</code>, <code>Usd.TraverseInstanceProxies()</code></td><td><code>ComputeInstanceTransformsAtTime()</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Asset resolution and publishing</h3>
+      <ul>
+        <li>The default resolver anchors relative paths to their layer and searches <code>PXR_AR_DEFAULT_SEARCH_PATH</code> for search-style paths.</li>
+        <li>A resolver context is bound per stage (<code>stage.GetPathResolverContext()</code>); custom resolvers use it to pin versions per shot.</li>
+        <li>Publish immutable versioned files; point shots at versions through the resolver or expression variables, never by overwriting.</li>
+        <li>USDZ is an uncompressed, 64-byte-aligned zip of usdc/usda, images and audio. Build with <code>usdzip</code> or <code>UsdUtils.CreateNewUsdzPackage()</code>.</li>
+        <li>Validate at publish with <code>usdchecker</code> (UsdValidation framework). <code>UsdUtils.ComplianceChecker</code> is deprecated.</li>
+      </ul>
+    </section>
+
+    <!-- 06 HYDRA -->
+    <section id="hydra">
+      <div class="eyebrow">&lt;/Manual/Hydra&gt;</div>
+      <h2>Hydra</h2>
+      <p class="lead">Hydra is the bridge between scene description and renderers. Since v25.11 the scene index path (Hydra 2.0) is the default, and v26.03 completed the transition.</p>
+      <div class="flow">
+        <div class="st"><h4>UsdStage</h4><p>Composed, resolved scene</p></div>
+        <div class="st key"><h4>UsdImaging scene index</h4><p><code>UsdImagingStageSceneIndex</code> + adapters turn prims into Hydra prims</p></div>
+        <div class="st key"><h4>Filtering scene indices</h4><p>hdsi stock filters, renderer plugins, yours</p></div>
+        <div class="st"><h4>Render index</h4><p>Observes the terminal scene index</p></div>
+        <div class="st"><h4>Render delegate</h4><p>Storm, HdEmbree, Karma, RTX, hdParticleField</p></div>
+        <div class="st"><h4>Tasks + AOVs</h4><p>hdx render, selection, color correction; Hgi draws</p></div>
+      </div>
+
+      <h3>The data model</h3>
+      <ul>
+        <li>A scene index answers two questions: <code>GetPrim(path)</code> returns an <code>HdSceneIndexPrim</code> (a <code>primType</code> token and a container data source), and <code>GetChildPrimPaths(path)</code> returns children.</li>
+        <li>Data sources are lazy and typed through schemas such as <code>HdMeshSchema</code>, <code>HdXformSchema</code>, <code>HdPrimvarsSchema</code>. Sampled sources expose values at shutter offsets for motion blur.</li>
+        <li>Changes flow as observer notices: <code>PrimsAdded</code>, <code>PrimsRemoved</code>, <code>PrimsDirtied</code> (with data source locators naming what changed) and <code>PrimsRenamed</code>.</li>
+        <li>Prim categories in the render delegate: Rprims (mesh, curves, points, volumes), Sprims (camera, lights, materials, render settings), Bprims (render buffers).</li>
+        <li>Legacy Hydra 1.0 scene delegates still run through an emulation layer, but new work should be scene indices.</li>
+      </ul>
+
+      <h3>Write a filtering scene index</h3>
+      <p>Subclass <code>HdSingleInputFilteringSceneIndexBase</code>, override the queries, forward or edit notices, then wrap it in a scene index plugin.</p>
+<div class="code" data-lang="cpp"><pre><code>#include "pxr/imaging/hd/filteringSceneIndex.h"
+#include "pxr/imaging/hd/overlayContainerDataSource.h"
+#include "pxr/imaging/hd/tokens.h"
+
+PXR_NAMESPACE_OPEN_SCOPE
+
+TF_DECLARE_REF_PTRS(KindTintSceneIndex);
+
+class KindTintSceneIndex : public HdSingleInputFilteringSceneIndexBase
+{
+public:
+    static KindTintSceneIndexRefPtr New(const HdSceneIndexBaseRefPtr &amp;input,
+                                        const HdContainerDataSourceHandle &amp;overlay) {
+        return TfCreateRefPtr(new KindTintSceneIndex(input, overlay));
+    }
+
+    HdSceneIndexPrim GetPrim(const SdfPath &amp;path) const override {
+        HdSceneIndexPrim prim = _GetInputSceneIndex()-&gt;GetPrim(path);
+        if (prim.primType == HdPrimTypeTokens-&gt;mesh &amp;&amp; prim.dataSource) {
+            prim.dataSource = HdOverlayContainerDataSource::New(_overlay, prim.dataSource);
+        }
+        return prim;
+    }
+
+    SdfPathVector GetChildPrimPaths(const SdfPath &amp;path) const override {
+        return _GetInputSceneIndex()-&gt;GetChildPrimPaths(path);
+    }
+
+protected:
+    KindTintSceneIndex(const HdSceneIndexBaseRefPtr &amp;input,
+                       const HdContainerDataSourceHandle &amp;overlay)
+        : HdSingleInputFilteringSceneIndexBase(input), _overlay(overlay) {}
+
+    void _PrimsAdded(const HdSceneIndexBase &amp;,
+                     const HdSceneIndexObserver::AddedPrimEntries &amp;e) override { _SendPrimsAdded(e); }
+    void _PrimsRemoved(const HdSceneIndexBase &amp;,
+                       const HdSceneIndexObserver::RemovedPrimEntries &amp;e) override { _SendPrimsRemoved(e); }
+    void _PrimsDirtied(const HdSceneIndexBase &amp;,
+                       const HdSceneIndexObserver::DirtiedPrimEntries &amp;e) override { _SendPrimsDirtied(e); }
+
+private:
+    HdContainerDataSourceHandle _overlay;   // e.g. a displayColor primvar built with HdPrimvarsSchema
+};
+
+PXR_NAMESPACE_CLOSE_SCOPE</code></pre></div>
+      <p>Register the plugin for a renderer with <code>HdSceneIndexPluginRegistry::GetInstance().RegisterSceneIndexForRenderer(rendererDisplayName, pluginId, inputArgs, insertionPhase, InsertionOrderAtStart)</code>. The insertion phase is an integer: lower runs earlier in the chain. Apps call <code>AppendSceneIndicesForRenderer()</code> to build the chain, and from v26.11 can pass <code>sceneIndexCreateArgs</code> through it to your plugin. v26.11 also adds <code>HdCreateOverlayContainerDataSource</code> as the general way to overlay data sources.</p>
+
+      <h3>AOVs for synthetic data</h3>
+      <p>Hydra's AOV tokens include <code>color</code>, <code>depth</code>, <code>primId</code>, <code>instanceId</code>, <code>elementId</code>, <code>normal</code>, <code>Neye</code> and <code>Peye</code>. ID buffers map back to prim paths, which gives you segmentation masks without a separate pass. From v26.11 the numeric prim ID is computed by <code>HdsiPrimIdSceneIndex</code>, so read it from the terminal scene index instead of <code>HdRenderIndex::GetRprimPathFromPrimId()</code>. Describe outputs renderer-neutrally with <code>RenderSettings</code>, <code>RenderProduct</code> and <code>RenderVar</code> prims.</p>
+<div class="code" data-lang="bash"><pre><code># headless frames with Hydra (Storm unless --renderer says otherwise)
+usdrecord --camera /World/Cam --frames 1:48 --imageWidth 1280 shot.usda out/frame.####.png</code></pre></div>
+    </section>
+
+    <!-- 07 EXTENDING -->
+    <section id="extending">
+      <div class="eyebrow">&lt;/Manual/Extending&gt;</div>
+      <h2>Extending USD</h2>
+      <p class="lead">Every extension is a plugin found through <code>plugInfo.json</code> on <code>PXR_PLUGINPATH_NAME</code>. Build C++ plugins against the exact OpenUSD build of the host app: Houdini, Unreal, Omniverse and your own build each ship different versions and namespaces.</p>
+
+      <h3>1. A codeless schema</h3>
+      <p>No compiler: define the schema, generate its definition, point the plugin path at it. Good for studio metadata and API schemas.</p>
+      <div class="note"><b>Don't duplicate built-ins.</b> Class labels already have a standard home: <code>SemanticsLabelsAPI:&lt;taxonomy&gt;</code> with <code>token[] semantics:labels:&lt;taxonomy&gt;</code>. It has no instance or track ID, so the example below adds only that.</div>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(
+    subLayers = [@usd/schema.usda@]
+)
+
+over "GLOBAL" (
+    customData = {
+        string libraryName = "studioLabels"
+        string libraryPath = "."
+        bool skipCodeGeneration = true
+    }
+)
+{
+}
+
+class "TrackLabelAPI" (
+    inherits = &lt;/APISchemaBase&gt;
+    customData = {
+        token apiSchemaType = "singleApply"
+    }
+    doc = "Stable track id for synthetic-data ground truth. Pair with SemanticsLabelsAPI for classes."
+)
+{
+    int label:trackId = -1 (doc = "Stable instance id across frames.")
+}</code></pre></div>
+<div class="code" data-lang="bash"><pre><code>usdGenSchema schema.usda ./studioLabels      # writes generatedSchema.usda + plugInfo.json
+export PXR_PLUGINPATH_NAME=$PWD/studioLabels:$PXR_PLUGINPATH_NAME
+python -c "from pxr import Usd; print(Usd.SchemaRegistry().FindAppliedAPIPrimDefinition('TrackLabelAPI'))"</code></pre></div>
+<div class="code" data-lang="python"><pre><code>prim.ApplyAPI("TrackLabelAPI")                     # codeless schemas apply by name
+prim.GetAttribute("label:trackId").Set(17)
+
+prim.ApplyAPI("SemanticsLabelsAPI", "class")       # built-in, multiple-apply
+prim.GetAttribute("semantics:labels:class").Set(["forklift", "vehicle"])</code></pre></div>
+
+      <h3>2. A compiled schema</h3>
+      <ul>
+        <li>Remove <code>skipCodeGeneration</code>, set <code>libraryPath</code>, and <code>usdGenSchema</code> writes C++ classes, Python wrappers, tokens and <code>plugInfo.json</code> with a <code>LibraryPath</code>.</li>
+        <li>Build with CMake: <code>find_package(pxr CONFIG REQUIRED)</code>, link <code>usd</code>, <code>sdf</code>, <code>tf</code>; match the host's compiler, C++ standard and Python ABI.</li>
+        <li>You get typed accessors (<code>TrackLabelAPI::GetLabelClassAttr()</code>) and schema fallbacks inside C++ tools and Hydra plugins.</li>
+      </ul>
+
+      <h3>3. A file format plugin</h3>
+      <p>Make any file readable as a layer. The pattern: parse the file, author specs into an anonymous layer, transfer them in.</p>
+<div class="code" data-lang="cpp"><pre><code>#include "pxr/usd/sdf/fileFormat.h"
+#include "pxr/usd/sdf/layer.h"
+#include "pxr/usd/usd/usdaFileFormat.h"
+
+PXR_NAMESPACE_OPEN_SCOPE
+
+TF_DEFINE_PRIVATE_TOKENS(_tokens,
+    ((Id, "ply")) ((Version, "1.0")) ((Target, "usd")) ((Ext, "ply")));
+
+class PlyFileFormat : public SdfFileFormat
+{
+public:
+    bool CanRead(const std::string &amp;path) const override { return true; }
+
+    bool Read(SdfLayer *layer, const std::string &amp;resolvedPath,
+              bool metadataOnly) const override {
+        SdfLayerRefPtr tmp = SdfLayer::CreateAnonymous(".usda");
+        // parse resolvedPath; author a ParticleField3DGaussianSplat prim with Sdf API
+        layer-&gt;TransferContent(tmp);
+        return true;
+    }
+
+    bool WriteToString(const SdfLayer &amp;layer, std::string *str,
+                       const std::string &amp;comment) const override {
+        return SdfFileFormat::FindById(UsdUsdaFileFormatTokens-&gt;Id)
+            -&gt;WriteToString(layer, str, comment);   // show contents as usda
+    }
+
+protected:
+    SDF_FILE_FORMAT_FACTORY_ACCESS;
+    PlyFileFormat()
+        : SdfFileFormat(_tokens-&gt;Id, _tokens-&gt;Version, _tokens-&gt;Target, _tokens-&gt;Ext) {}
+};
+
+TF_REGISTRY_FUNCTION(TfType) { SDF_DEFINE_FILE_FORMAT(PlyFileFormat, SdfFileFormat); }
+
+PXR_NAMESPACE_CLOSE_SCOPE</code></pre></div>
+<div class="code" data-lang="json"><pre><code>{
+  "Plugins": [{
+    "Type": "library",
+    "Name": "usdPly",
+    "LibraryPath": "libusdPly.so",
+    "Root": "..",
+    "ResourcePath": "resources",
+    "Info": {
+      "Types": {
+        "PlyFileFormat": {
+          "bases": ["SdfFileFormat"],
+          "displayName": "PLY splats and point clouds",
+          "extensions": ["ply"],
+          "formatId": "ply",
+          "primary": true,
+          "target": "usd"
+        }
+      }
+    }
+  }]
+}</code></pre></div>
+      <p>For procedural layers, also implement <code>PcpDynamicFileFormatInterface</code> and pass arguments in the asset path: <code>@scatter.ply:SDF_FORMAT_ARGS:density=0.5@</code>.</p>
+
+      <h3>4. An asset resolver</h3>
+      <p>Map logical identifiers such as <code>asset://robot/v012/robot.usd</code> to storage. Register it as a URI resolver for a scheme, or make it the primary resolver with <code>ArSetPreferredResolver()</code> before first use.</p>
+<div class="code" data-lang="cpp"><pre><code>class AssetUriResolver final : public ArResolver
+{
+protected:
+    std::string _CreateIdentifier(const std::string &amp;assetPath,
+                                  const ArResolvedPath &amp;anchor) const override;
+    std::string _CreateIdentifierForNewAsset(const std::string &amp;assetPath,
+                                             const ArResolvedPath &amp;anchor) const override;
+    ArResolvedPath _Resolve(const std::string &amp;assetPath) const override;
+    ArResolvedPath _ResolveForNewAsset(const std::string &amp;assetPath) const override;
+    std::shared_ptr&lt;ArAsset&gt; _OpenAsset(const ArResolvedPath &amp;resolved) const override;
+    std::shared_ptr&lt;ArWritableAsset&gt; _OpenAssetForWrite(const ArResolvedPath &amp;resolved,
+                                                         WriteMode mode) const override;
+    // optional: _CreateDefaultContext, _CreateDefaultContextForAsset,
+    //           _IsContextDependentPath, _GetModificationTimestamp
+};
+
+AR_DEFINE_RESOLVER(AssetUriResolver, ArResolver);</code></pre></div>
+<div class="code" data-lang="json"><pre><code>"AssetUriResolver": {
+    "bases": ["ArResolver"],
+    "uriSchemes": ["asset"]
+}</code></pre></div>
+      <p>Prototype in Python first with Scheller's open-source resolvers (including a Python-callable resolver), then port the hot path to C++.</p>
+
+      <h3>5. Other extension points</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Point</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td>Kinds</td><td><code>"Kinds": { "prop": { "baseKind": "component" } }</code> in plugInfo.json</td></tr>
+          <tr><td>Validators</td><td>Register with the UsdValidation registry; run by <code>usdchecker</code></td></tr>
+          <tr><td>Shader nodes</td><td>Sdr parser plugin for your node definitions</td></tr>
+          <tr><td>Imaging</td><td>Scene index plugins, render delegates, Hydra generative procedurals</td></tr>
+          <tr><td>usdview</td><td>Python <code>PluginContainer</code> adds menu commands</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Building OpenUSD</h3>
+<div class="code" data-lang="bash"><pre><code>git clone https://github.com/PixarAnimationStudios/OpenUSD
+python OpenUSD/build_scripts/build_usd.py --materialx --embree ~/usd/26.08
+# options: --openvdb --openimageio --alembic --draco --no-python --build-variant debug
+# see build_usd.py --help for the WebAssembly (emscripten) target added in v26.03
+export PATH=~/usd/26.08/bin:$PATH
+export PYTHONPATH=~/usd/26.08/lib/python:$PYTHONPATH</code></pre></div>
+      <p>v26.11 builds against VFX Reference Platform 2025: Python 3.11 or newer, oneTBB by default, CMake 3.27 or newer (since v26.08), and PySide6 for usdview.</p>
+      <p class="muted">From Zig, call USD through a thin <code>extern "C"</code> layer compiled with the same toolchain as USD, or read files natively (project 8) when you only need data.</p>
+    </section>
+
+    <!-- 08 PROJECTS -->
+    <section id="projects">
+      <div class="eyebrow">&lt;/Manual/Projects&gt;</div>
+      <h2>Nine projects</h2>
+      <p class="lead">Ordered by difficulty. Each one forces an exam area into your hands, and the last five are portfolio pieces for simulation and synthetic-data work.</p>
+      <div class="proj" id="proj"></div>
+    </section>
+
+    <!-- 09 EXAM -->
+    <section id="exam">
+      <div class="eyebrow">&lt;/Manual/Certification&gt;</div>
+      <h2>NCP-OUSD exam</h2>
+      <p class="lead">NVIDIA-Certified Professional: OpenUSD Development. $200, online and remotely proctored, 60–70 questions in 120 minutes, valid for two years. The Learn OpenUSD curriculum is its official study path.</p>
+      <p>Prerequisites listed: two to three years with OpenUSD and Python or C++, or completing the study materials. Select an area to see what to know and where it lives in this manual.</p>
+      <div class="card">
+        <div class="bars" id="bars"></div>
+        <div class="axis" aria-hidden="true"><span></span><span class="ticks"><span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span></span><span></span></div>
+        <div class="areadetail" id="areaDetail" aria-live="polite"></div>
+      </div>
+      <div class="note"><b>Plan your hours by weight.</b> With 60 study hours, composition alone deserves about 14. The blueprint expects you to debug complex LIVERPS cases, not just recite the order.</div>
+    </section>
+
+    <!-- 10 CHEATSHEET -->
+    <section id="cheatsheet">
+      <div class="eyebrow">&lt;/Manual/CheatSheet&gt;</div>
+      <h2>Cheat sheet</h2>
+      <div class="search"><input id="cheatQ" type="search" placeholder="Filter commands and variables, e.g. flatten, debug, usdz" aria-label="Filter the cheat sheet"><span class="cnt" id="cheatCnt"></span></div>
+      <div class="tbl"><table id="cheat">
+        <thead><tr><th>Command or variable</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td><code>usdcat in.usd</code></td><td>Print as usda; <code>--flatten</code> composes; <code>-o out.usdc</code> converts format</td></tr>
+          <tr><td><code>usdview in.usd</code></td><td>Viewer with composition, layer stack, metadata and Python panels</td></tr>
+          <tr><td><code>usdtree in.usd</code></td><td>Prim hierarchy; <code>-a</code> adds attributes</td></tr>
+          <tr><td><code>usdchecker in.usd</code></td><td>Validation report (UsdValidation)</td></tr>
+          <tr><td><code>usdresolve path</code></td><td>Show what an asset path resolves to</td></tr>
+          <tr><td><code>usdedit in.usdc</code></td><td>Edit a binary layer as text in $EDITOR, saved back on close</td></tr>
+          <tr><td><code>usddiff a.usd b.usd</code></td><td>Diff two layers as text</td></tr>
+          <tr><td><code>usdzip -r asset.usd -o asset.usdz</code></td><td>Package a layer and its dependencies</td></tr>
+          <tr><td><code>usdrecord in.usd out.####.png</code></td><td>Headless Hydra render</td></tr>
+          <tr><td><code>usdGenSchema schema.usda dir</code></td><td>Generate schema code or generatedSchema.usda</td></tr>
+          <tr><td><code>usddumpcrate in.usdc</code></td><td>Inspect a crate file's structure</td></tr>
+          <tr><td><code>sdfdump in.usdc</code></td><td>Low-level spec dump</td></tr>
+          <tr><td><code>usdstitch a.usd b.usd -o out.usd</code></td><td>Merge layers (e.g. per-frame caches)</td></tr>
+          <tr><td><code>usdstitchclips</code></td><td>Build value-clip manifests and topology layers</td></tr>
+          <tr><td><code>usdupdatecrate in.usdc</code></td><td>Rewrite an old binary crate file in the current version (needed for files older than 0.4.0 from v26.11)</td></tr>
+          <tr><td><code>usdauthors in.usd</code></td><td>Summarize AuthorshipAPI records in a composition (v26.11)</td></tr>
+          <tr><td><code>usdcrush</code></td><td>Encode meshes with Polygonal Mesh Coding compression (v26.11, PMC build)</td></tr>
+          <tr><td><code>PXR_PLUGINPATH_NAME</code></td><td>Extra folders searched for plugInfo.json</td></tr>
+          <tr><td><code>PXR_AR_DEFAULT_SEARCH_PATH</code></td><td>Search paths for the default resolver</td></tr>
+          <tr><td><code>PXR_WORK_THREAD_LIMIT</code></td><td>Cap USD's worker threads</td></tr>
+          <tr><td><code>TF_DEBUG</code></td><td>Enable debug codes, e.g. <code>PCP_PRIM_INDEX</code></td></tr>
+          <tr><td><code>pip install usd-core</code></td><td>Non-imaging libraries for Python (no usdview, no Hydra)</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Python you will write every week</h3>
+<div class="code" data-lang="python"><pre><code>from pxr import Usd, UsdGeom, UsdShade, Sdf, Gf, Vt
+import numpy as np
+
+# open, traverse with predicates, prune at components
+stage = Usd.Stage.Open("set.usda")
+for prim in Usd.PrimRange.Stage(stage, Usd.TraverseInstanceProxies(Usd.PrimDefaultPredicate)):
+    if prim.IsComponent():
+        print(prim.GetPath(), Usd.ModelAPI(prim).GetKind())
+
+# author with the Usd API
+stage = Usd.Stage.CreateNew("shot.usda")
+UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+world = UsdGeom.Xform.Define(stage, "/World")
+stage.SetDefaultPrim(world.GetPrim())
+robot = stage.DefinePrim("/World/Robot")
+robot.GetReferences().AddReference("./assets/robot.usd")
+robot.GetVariantSets().GetVariantSet("lod").SetVariantSelection("high")
+
+# animated transform
+op = UsdGeom.Xformable(robot).AddTranslateOp()
+for f in range(1, 25):
+    op.Set(Gf.Vec3d(f * 0.1, 0, 0), f)
+
+# bulk data fast: Sdf + change block
+layer = stage.GetRootLayer()
+with Sdf.ChangeBlock():
+    for i in range(10000):
+        spec = Sdf.CreatePrimInLayer(layer, f"/World/Rocks/r{i}")
+        spec.specifier = Sdf.SpecifierDef
+        spec.typeName = "Sphere"
+
+# arrays to numpy and back
+mesh = UsdGeom.Mesh.Define(stage, "/World/Grid")
+pts = np.random.rand(100, 3).astype(np.float32)
+mesh.GetPointsAttr().Set(Vt.Vec3fArray.FromNumpy(pts))
+
+# caches for speed
+xf_cache = UsdGeom.XformCache(Usd.TimeCode(1))
+bb_cache = UsdGeom.BBoxCache(Usd.TimeCode(1), [UsdGeom.Tokens.default_, UsdGeom.Tokens.render])
+print(xf_cache.GetLocalToWorldTransform(robot), bb_cache.ComputeWorldBound(robot))
+
+# bind a material
+mat = UsdShade.Material.Define(stage, "/World/Looks/Painted")
+UsdShade.MaterialBindingAPI.Apply(mesh.GetPrim()).Bind(mat)
+
+# author into another layer
+anim = Sdf.Layer.CreateNew("anim.usda")
+layer.subLayerPaths.insert(0, anim.identifier)
+stage.SetEditTarget(anim)
+
+stage.GetRootLayer().Save()
+print(stage.ExportToString(addSourceFileComment=False)[:400])</code></pre></div>
+
+      <h3>Verify any schema yourself</h3>
+      <p>Docs and release blogs drift from the code. The schema registry is the source of truth: it lists a schema's real usda name, kind, properties, types and fallbacks.</p>
+<div class="code" data-lang="python"><pre><code># pip install usd-core   (then: python verify.py BackPlateAPI)
+import sys
+from pxr import Usd, Tf
+
+reg = Usd.SchemaRegistry()
+name = sys.argv[1]
+d = reg.FindConcretePrimDefinition(name) or reg.FindAppliedAPIPrimDefinition(name)
+if not d:
+    hits = [t.typeName for t in Tf.Type.Find(Usd.SchemaBase).GetAllDerivedTypes()
+            if name.lower() in t.typeName.lower()]
+    sys.exit(f"No schema '{name}'. C++ types that match: {hits}")
+print("version:", Usd.GetVersion(), " built-in APIs:", list(d.GetAppliedAPISchemas()))
+for p in d.GetPropertyNames():
+    spec = d.GetSchemaPropertySpec(p)
+    if hasattr(spec, "typeName"):
+        print(f"{p}: {spec.typeName}  fallback={d.GetAttributeFallbackValue(p)}")
+    else:
+        print(f"{p}: rel")</code></pre></div>
+      <p class="muted">Multiple-apply schemas print their properties with an <code>__INSTANCE_NAME__</code> placeholder. To prove a snippet is valid, load it: <code>Sdf.Layer.CreateAnonymous(".usda").ImportFromString(text)</code> raises on any syntax error.</p>
+
+      <h3>usda syntax at a glance</h3>
+<div class="code" data-lang="usda"><pre><code>#usda 1.0
+(                                     # layer metadata
+    defaultPrim = "World"
+    timeCodesPerSecond = 24
+    startTimeCode = 1
+    endTimeCode = 48
+)
+
+def Xform "World" (                   # specifier, type, name, prim metadata
+    kind = "assembly"
+)
+{
+    custom string studio:note = "hello"          # custom = not in any schema
+    uniform token purpose = "default"             # uniform = not animatable
+    double3 xformOp:translate.timeSamples = {
+        1: (0, 0, 0),
+        48: (5, 0, 0),
+    }
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+    rel material:binding = &lt;/World/Looks/Painted&gt;
+    asset tex = @@@weird@name.png@@@             # triple @ escapes @ in paths
+}</code></pre></div>
+    </section>
+
+    <!-- 11 SOURCES -->
+    <section id="sources">
+      <div class="eyebrow">&lt;/Manual/Sources&gt;</div>
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://docs.nvidia.com/learn-openusd/latest/index.html" target="_blank" rel="noopener">Learn OpenUSD — NVIDIA</a></li>
+        <li><a href="https://www.nvidia.com/en-us/learn/certification/openusd-development-professional/" target="_blank" rel="noopener">NCP-OUSD certification and exam blueprint — NVIDIA</a></li>
+        <li><a href="https://lucascheller.github.io/VFX-UsdSurvivalGuide" target="_blank" rel="noopener">USD Survival Guide — Luca Scheller</a></li>
+        <li><a href="https://openusd.org/files/USD_Quickstart_Guide.pdf" target="_blank" rel="noopener">USD Quickstart Guide — Pixar</a></li>
+        <li><a href="https://github.com/PixarAnimationStudios/OpenUSD/blob/v26.11.1/CHANGELOG.md" target="_blank" rel="noopener">OpenUSD v26.11 changelog — GitHub</a></li>
+        <li><a href="https://aousd.org/blog/announcing-openusd-v26-08-key-features-and-improvements/" target="_blank" rel="noopener">Announcing OpenUSD v26.08 — AOUSD</a></li>
+        <li><a href="https://aousd.org/blog/openusd-v26-03/" target="_blank" rel="noopener">OpenUSD v26.03 — AOUSD</a></li>
+        <li><a href="https://aousd.org/blog/announcing-openusd-v26-05-key-features-and-improvements/" target="_blank" rel="noopener">OpenUSD v26.05 — AOUSD</a></li>
+        <li><a href="https://openusd.org/release/user_guides/schemas/usdVol/ParticleField3DGaussianSplat.html" target="_blank" rel="noopener">ParticleField3DGaussianSplat schema — openusd.org</a></li>
+        <li><a href="https://openusd.org/release/user_guides/schemas/usdVol/ParticleFieldSphericalHarmonicsAttributeAPI.html" target="_blank" rel="noopener">ParticleFieldSphericalHarmonicsAttributeAPI — openusd.org</a></li>
+        <li><a href="https://openusd.org/release/api/scene_index_plugin_registry_8h_source.html" target="_blank" rel="noopener">HdSceneIndexPluginRegistry header — openusd.org</a></li>
+        <li><a href="https://www.linuxfoundation.org/press/alliance-for-openusd-announces-core-specification-1.0-the-universal-language-for-building-3d-worlds" target="_blank" rel="noopener">Core Specification 1.0 announcement — Linux Foundation</a></li>
+        <li><a href="https://lf-aswf.atlassian.net/wiki/x/FCis" target="_blank" rel="noopener">ASWF USD Working Group resources</a></li>
+        <li><a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/universal-scene-description-in-unreal-engine" target="_blank" rel="noopener">Universal Scene Description in Unreal Engine — Epic</a></li>
+        <li><a href="https://docs.blender.org/manual/nb/5.0/files/import_export/usd.html" target="_blank" rel="noopener">Blender 5.0 manual: USD import and export</a></li>
+      </ul>
+      <footer>OpenUSD Field Manual · written against OpenUSD v26.11.1 and AOUSD Core Specification 1.0 · as of November 11, 2026. Verify version-specific details against release notes before shipping pipeline code.</footer>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  /* ---------- code highlighting + copy ---------- */
+  const KW = {
+    usda: "def|over|class|variantSet|variantSets|variants|prepend|append|delete|uniform|custom|rel|references|payload|inherits|specializes|subLayers|None",
+    python: "from|import|for|in|if|else|with|as|def|return|print|range|True|False|None",
+    cpp: "class|public|protected|private|override|const|return|bool|static|final|std|if|virtual|void|int",
+    bash: "export|python|git|usdGenSchema|usdrecord",
+    json: "true|false",
+    text: ""
+  };
+  function hl(src, lang) {
+    const kw = KW[lang] || "";
+    const commentRe = lang === "cpp" || lang === "json" ? "\\/\\/[^\\n]*" : (lang === "text" ? "(?!)" : "(?<![\\w.#])#[^\\n]*");
+    const parts = [
+      "(" + commentRe + ")",
+      '("(?:[^"\\\\\\n]|\\\\.)*")',
+      lang === "usda" ? "(@@@.*?@@@|@[^@\\n]*@)" : "(?!)",
+      lang === "usda" ? "(<\\/[^>\\n]*>)" : "(?!)",
+      kw ? "\\b(" + kw + ")\\b" : "(?!)"
+    ];
+    const re = new RegExp(parts.join("|"), "g");
+    let out = "", last = 0, m;
+    while ((m = re.exec(src))) {
+      if (m[0] === "") { re.lastIndex++; continue; }
+      out += esc(src.slice(last, m.index));
+      const cls = m[1] ? "c-com" : m[2] ? "c-str" : (m[3] || m[4]) ? "c-path" : "c-kw";
+      out += '<span class="' + cls + '">' + esc(m[0]) + "</span>";
+      last = re.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+  document.querySelectorAll(".code").forEach(block => {
+    const lang = block.dataset.lang || "text";
+    const codeEl = block.querySelector("code");
+    const raw = codeEl.textContent;
+    codeEl.innerHTML = hl(raw, lang);
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.innerHTML = '<span>' + lang + '</span><button class="copy" type="button">Copy</button>';
+    block.prepend(bar);
+    const btn = bar.querySelector(".copy");
+    btn.addEventListener("click", () => {
+      const done = () => { btn.textContent = "Copied"; setTimeout(() => (btn.textContent = "Copy"), 1400); };
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(codeEl); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected"; setTimeout(() => (btn.textContent = "Copy"), 1400); };
+      try { navigator.clipboard.writeText(raw).then(done, fallback); } catch (e) { fallback(); }
+    });
+  });
+
+  /* ---------- hero stack ---------- */
+  const heroLayers = [
+    { id: "session", nm: "session layer", sub: "in-memory, never saved", val: "3.0", on: false },
+    { id: "shot", nm: "shot.usda", sub: "root layer", val: "2.5", on: false },
+    { id: "anim", nm: "anim.usda", sub: "sublayer of shot.usda", val: "2.0", on: true },
+    { id: "asset", nm: "ball.usd", sub: "reached through a reference", val: "1.5", on: true }
+  ];
+  function renderHero() {
+    const host = $("#heroStack");
+    host.innerHTML = "";
+    const winner = heroLayers.find(l => l.on);
+    heroLayers.forEach(l => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sheet" + (l === winner ? " win" : "");
+      b.setAttribute("aria-pressed", String(l.on));
+      b.innerHTML = '<span><span class="nm">' + l.nm + '</span><span class="sub">' + l.sub + '</span></span><span class="val tnum">radius = ' + l.val + '</span>';
+      b.addEventListener("click", () => { l.on = !l.on; renderHero(); host.querySelectorAll(".sheet")[heroLayers.indexOf(l)].focus(); });
+      host.appendChild(b);
+    });
+    $("#heroResult").innerHTML = winner
+      ? "Resolved: <b>radius = " + winner.val + "</b> from " + winner.nm
+      : "Resolved: <b>radius = 1.0</b> from the Sphere schema fallback";
+  }
+  renderHero();
+
+  /* ---------- architecture explorer ---------- */
+  const tiers = [
+    { name: "Imaging", path: "pxr/imaging, pxr/usdImaging", libs: {
+      usdImaging: ["Translates a stage into Hydra prims.", "UsdImagingStageSceneIndex, prim adapters", "Supporting a custom schema in the viewport", "A schema with no adapter is invisible to every Hydra renderer."],
+      usdImagingGL: ["Drives Hydra for apps such as usdview and usdrecord.", "UsdImagingGLEngine", "Embedding a viewport in your own tool", "It owns GL state; share contexts carefully in host apps."],
+      hd: ["Hydra core: scene indices, data sources, render index, render delegate interface.", "HdSceneIndexBase, HdDataSource, HdRenderDelegate, HdSceneIndexPluginRegistry", "Writing scene index filters or a renderer", "Data sources are lazy; holding stale handles after a dirty notice gives old data."],
+      hdsi: ["Stock filtering scene indices.", "Implicit-surface to mesh, material binding resolve, prototype propagation", "Learning how real filters are written", "Order in the chain matters; check insertion phases."],
+      hdx: ["Tasks: render, selection highlighting, AOV resolve, color correction.", "HdxTaskController, HdxRenderTask", "Pulling AOVs such as primId for segmentation", "AOV formats differ per renderer; check the descriptor."],
+      hdSt: ["Storm, the real-time rasterizer used by usdview.", "HdStRenderDelegate", "Fast previews and viewport parity checks", "Not every schema feature is drawn (e.g. backplates in v26.08)."],
+      hgi: ["Graphics API abstraction with HgiGL, HgiMetal and HgiVulkan backends.", "Hgi, HgiTexture, HgiBuffer", "Porting Storm-style GPU code", "Vulkan support is newer than GL and Metal."],
+      hio: ["Image I/O plugins.", "HioImage; stb, OpenEXR, OpenImageIO readers", "Texture formats that do not load", "Build with --openimageio for formats stb lacks."]
+    }},
+    { name: "Schemas", path: "pxr/usd/usd*", libs: {
+      usdGeom: ["Spatial schemas: xforms, meshes, curves, points, cameras, instancers, stage metrics.", "UsdGeomMesh, Xformable, PointInstancer, XformCache, BBoxCache", "Almost everything", "subdivisionScheme defaults to catmullClark."],
+      usdShade: ["Materials, shaders, node graphs, bindings.", "UsdShadeMaterial, Shader, MaterialBindingAPI", "Material interchange", "Purpose-specific and collection bindings change what a renderer sees."],
+      usdLux: ["Lights and light linking.", "UsdLuxSphereLight, DomeLight, LightAPI", "Lighting that survives app boundaries", "Intensity is scaled by 2^exposure and normalize changes size dependence."],
+      usdSkel: ["Skeletal animation and skinning.", "UsdSkelSkeleton, SkelAnimation, BindingAPI, Cache", "Characters, mocap retargeting", "Joint order mismatches break skinning silently."],
+      usdPhysics: ["Rigid bodies, collisions, joints, articulations.", "RigidBodyAPI, CollisionAPI, RevoluteJoint, ArticulationRootAPI", "Robot descriptions for simulation", "Units come from the stage; check metersPerUnit and kilogramsPerUnit."],
+      usdVol: ["Volumes and particle fields, including Gaussian splats.", "UsdVolVolume, OpenVDBAsset, ParticleField3DGaussianSplat", "VDBs and 3DGS captures", "Splat arrays shorter than the particle count are ignored."],
+      usdRender: ["Renderer-neutral render settings, products and AOVs.", "RenderSettings, RenderProduct, RenderVar", "Synthetic-data passes", "Renderers support different RenderVar source names."],
+      usdLod: ["Runtime level-of-detail selection (v26.08).", "LODRootAPI, LODDistanceHeuristic, LODScreenSizeHeuristic, LODOverrideAPI (C++: UsdLod…)", "Large environments", "usda names are all-caps LOD; check renderer support before depending on it."],
+      usdSemantics: ["Semantic labels for segmentation and search.", "SemanticsLabelsAPI (multiple-apply, one instance per taxonomy)", "Synthetic-data class labels", "Labels are token arrays; there is no built-in track or instance ID."]
+    }},
+    { name: "USD core", path: "pxr/usd", libs: {
+      usd: ["The composed stage and its objects.", "UsdStage, UsdPrim, UsdAttribute, UsdRelationship, UsdEditTarget", "Every read and most writes", "Writes go to the edit target, not to the layer the value came from."],
+      pcp: ["Prim Cache Population: the composition engine implementing LIVERPS.", "PcpCache, PcpPrimIndex, PcpNodeRef, PcpLayerStack", "Debugging composition", "Prim indices are cached; huge arc counts cost memory and open time."],
+      sdf: ["Scene description foundations: layers, specs, paths, value types, list-ops, file formats.", "SdfLayer, SdfPrimSpec, SdfPath, SdfChangeBlock, SdfFileFormat", "Fast bulk authoring, file format plugins", "Sdf edits bypass composition checks; you can author nonsense."],
+      ar: ["Asset resolution: identifiers to readable assets.", "ArResolver, ArResolverContext, ArAsset", "Asset management integration", "The resolver is chosen once per process."],
+      kind: ["The kind registry.", "KindRegistry, KindTokens", "Model hierarchy and custom kinds", "A broken hierarchy makes IsModel() false below the break."],
+      sdr: ["Shader definition registry (Ndr folded in).", "SdrRegistry, SdrShaderNode", "Custom shader nodes", "Terminology is mid-migration: sourceType → shadingSystem."],
+      usdUtils: ["Utilities: dependencies, flattening, stitching, packaging.", "ComputeAllDependencies, FlattenLayerStack, CreateNewUsdzPackage", "Publishing and packaging", "ComplianceChecker is deprecated."],
+      usdValidation: ["The validation framework behind usdchecker.", "UsdValidationRegistry, validators", "Publish-time checks", "Register studio validators as plugins."]
+    }},
+    { name: "Base", path: "pxr/base", libs: {
+      tf: ["Foundation types: tokens, runtime types, notices, ref pointers, diagnostics, debug codes.", "TfToken, TfType, TfNotice, TfRefPtr, TF_DEBUG", "Every plugin", "TfToken comparison is a pointer compare; build tokens once."],
+      gf: ["Graphics math.", "GfVec3d, GfMatrix4d, GfQuatf, GfRange3d, GfBBox3d", "Transforms and bounds", "Row-major; points multiply as v × M."],
+      vt: ["Type-erased values and copy-on-write arrays.", "VtValue, VtArray", "Bulk data and numpy interop", "Mutating a shared VtArray copies it."],
+      plug: ["Plugin discovery through plugInfo.json.", "PlugRegistry, PlugPlugin", "Loading any extension", "Turn on TF_DEBUG=PLUG_INFO_SEARCH when a plugin is not found."],
+      work: ["Multithreading on oneTBB.", "WorkDispatcher, WorkParallelForN", "Parallel tools", "Limit threads with PXR_WORK_THREAD_LIMIT inside host apps."],
+      trace: ["Profiling instrumentation.", "TraceCollector, TRACE_FUNCTION", "Finding slow opens and edits", "Collection costs time; enable only while measuring."],
+      ts: ["Spline animation curves evaluated during value resolution.", "TsSpline, TsKnot", "Animation curves in USD", "Spline support in DCC exporters is still uneven."],
+      arch: ["Platform abstraction.", "ArchLibraryOpen, ArchGetFileName", "Rarely, directly", "-"]
+    }}
+  ];
+  const arch = $("#arch");
+  let selected = null;
+  tiers.forEach((t, ti) => {
+    const row = document.createElement("div");
+    row.className = "tier";
+    row.innerHTML = '<div class="tl">' + t.name + '<small>' + t.path + '</small></div><div class="chips"></div>';
+    const chips = row.querySelector(".chips");
+    Object.keys(t.libs).forEach(name => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = name; b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", () => showLib(name, t.libs[name], b));
+      chips.appendChild(b);
+      if (name === "pcp") selected = { name, d: t.libs[name], b };
+    });
+    arch.appendChild(row);
+    if (ti < tiers.length - 1) { const f = document.createElement("div"); f.className = "flowdown"; f.textContent = "↑ reads from the tier below"; arch.appendChild(f); }
+  });
+  function showLib(name, d, btn) {
+    arch.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "false"));
+    btn.setAttribute("aria-pressed", "true");
+    $("#archDetail").innerHTML = '<h4>' + name + '</h4><p>' + d[0] + '</p><dl><dt>Key types</dt><dd>' + d[1] + '</dd><dt>You touch it</dt><dd>' + d[2] + '</dd><dt>Watch out</dt><dd>' + d[3] + '</dd></dl>';
+  }
+  if (selected) showLib(selected.name, selected.d, selected.b);
+
+  /* ---------- LIVERPS playground ---------- */
+  const arcsP = [
+    { k: "L", nm: "Local: shot layer stack", v: "0.10", on: false },
+    { k: "I", nm: "Inherits: shot edits /_class_Metal", v: "0.20", on: false },
+    { k: "V", nm: "VariantSets: finish = brushed", v: "0.30", on: true },
+    { k: "E", nm: "Relocates: rig namespace moved", v: "0.35", on: false },
+    { k: "R", nm: "References: asset material", v: "0.40", on: true },
+    { k: "P", nm: "Payloads: heavy look file", v: "0.50", on: false },
+    { k: "S", nm: "Specializes: base Metal", v: "0.60", on: true }
+  ];
+  const play = $("#play");
+  arcsP.forEach((a, i) => {
+    const row = document.createElement("div");
+    row.className = "prow";
+    row.innerHTML = '<span class="k">' + a.k + '</span><label for="pc' + i + '"><input type="checkbox" id="pc' + i + '"' + (a.on ? " checked" : "") + '><span>' + a.nm + '</span></label><input type="text" id="pv' + i + '" value="' + a.v + '" aria-label="' + a.nm + ' value" inputmode="decimal">';
+    row.querySelector("#pc" + i).addEventListener("change", e => { a.on = e.target.checked; renderPlay(); });
+    row.querySelector("#pv" + i).addEventListener("input", e => { a.v = e.target.value; renderPlay(); });
+    a.row = row;
+    play.appendChild(row);
+  });
+  function renderPlay() {
+    const w = arcsP.find(a => a.on);
+    arcsP.forEach(a => { a.row.classList.toggle("win", a === w); a.row.classList.toggle("dim", !a.on); });
+    $("#playResult").innerHTML = w
+      ? "inputs:roughness resolves to <b>" + esc(w.v || "(empty)") + "</b> via " + w.k + " — every weaker row is ignored."
+      : "No opinions: <b>schema fallback</b> (or no value).";
+  }
+  renderPlay();
+
+  /* ---------- puzzles ---------- */
+  const puzzles = [
+    { t: "Sublayer order", lv: "warm-up", q: "shot.usda has subLayers = [@anim.usda@, @layout.usda@]. layout.usda defines /Robot with translate (1, 0, 0); anim.usda overs it with (5, 0, 0). What does the stage report?",
+      code: '#usda 1.0\n(\n    subLayers = [@./anim.usda@, @./layout.usda@]\n)',
+      a: "(5, 0, 0)", why: "Earlier sublayers are stronger. Both opinions are Local; anim.usda comes first." },
+    { t: "A layer versus its sublayers", lv: "warm-up", q: "shot.usda sublayers layout.usda (translate (1, 0, 0)) and also authors over \"Robot\" { translate = (9, 0, 0) } directly. Result?",
+      code: '#usda 1.0\n(\n    subLayers = [@./layout.usda@]\n)\n\nover "Robot"\n{\n    double3 xformOp:translate = (9, 0, 0)\n}',
+      a: "(9, 0, 0)", why: "A layer's own opinions are stronger than anything in its sublayers." },
+    { t: "Direct opinion versus variant", lv: "core", q: "robot.usd selects paint = \"red\". The red variant sets displayColor to red, but the prim also has displayColor = blue outside the variant set. What color?",
+      code: 'def "Robot" (\n    variants = { string paint = "red" }\n    prepend variantSets = "paint"\n)\n{\n    color3f[] primvars:displayColor = [(0, 0, 1)]\n    variantSet "paint" = {\n        "red" {\n            color3f[] primvars:displayColor = [(1, 0, 0)]\n        }\n    }\n}',
+      a: "Blue (0, 0, 1)", why: "Local opinions on the prim beat its variants (L > V) within the same layer stack. Author anything a variant controls only inside the variants." },
+    { t: "Whose variant selection?", lv: "core", q: "The asset selects paint = \"red\". The shot references the asset and authors variants = { string paint = \"green\" } on the referencing prim. Which variant is active?",
+      code: 'def "Robot_01" (\n    prepend references = @./robot.usd@\n    variants = { string paint = "green" }\n)\n{\n}',
+      a: "green", why: "A selection is an opinion like any other. The shot's local selection is stronger than the one reached through the reference." },
+    { t: "Class broadcast through a reference", lv: "hard", q: "tree.usd has class \"_class_Tree\" at its root and def \"Tree\" (inherits = </_class_Tree>) with displayColor dark green authored directly on Tree. The shot references tree.usd as /Forest/Oak_01 and authors class \"_class_Tree\" { displayColor = orange }. What color is Oak_01?",
+      code: '# shot.usda\nclass "_class_Tree"\n{\n    color3f[] primvars:displayColor = [(0.9, 0.6, 0.1)]\n}\n\ndef "Forest"\n{\n    def "Oak_01" (\n        prepend references = @./tree.usd@\n    )\n    {\n    }\n}',
+      a: "Orange (0.9, 0.6, 0.1)", why: "The inherit path is outside the referenced prim, so it is implied into the shot's layer stack. That inherit node is stronger than the entire reference subtree, including the asset's direct opinion. This is why Inherits sits above References." },
+    { t: "Inherits versus specializes", lv: "hard", q: "looks.usd: Metal (roughness 0.4) and Rusty (specializes Metal, roughness 0.8). The shot references /Looks and overs Metal roughness = 0.1. What is Rusty's roughness? What if Rusty inherited Metal instead?",
+      code: '# shot.usda\ndef "World"\n{\n    def "Looks" (\n        prepend references = @./looks.usd@&lt;/Looks&gt;\n    )\n    {\n        over "Metal"\n        {\n            float inputs:roughness = 0.1\n        }\n    }\n}',
+      a: "0.8 with specializes; 0.1 with inherits", why: "Specializes is the weakest arc everywhere: Rusty's own 0.8 beats the shot's edit to the base. With inherits, the shot's opinion on Metal flows in as an inherit node stronger than the reference, so 0.1 wins." },
+    { t: "Default versus time samples", lv: "core", q: "lighting.usda (stronger) authors float radius = 5. anim.usda (weaker) authors radius.timeSamples = {1: 1, 10: 10}. Value at frame 3? And if both were in the same layer?",
+      code: '# lighting.usda\nfloat radius = 5\n\n# anim.usda\nfloat radius.timeSamples = {\n    1: 1,\n    10: 10,\n}',
+      a: "5; and 3 if both were in one layer", why: "Resolution stops at the strongest layer with any value source. Only within a single layer do time samples beat the default (then linear interpolation gives 3)." },
+    { t: "A value block", lv: "core", q: "A stronger layer authors double radius = None on a Sphere; a weaker layer authors radius = 4. What does Get() return?",
+      code: 'over "Ball"\n{\n    double radius = None\n}',
+      a: "1.0, the Sphere schema fallback", why: "A block stops resolution, so the weaker 4 is never reached; the attribute then reports its schema fallback." },
+    { t: "Inside an unloaded payload", lv: "core", q: "The stage opens with Usd.Stage.LoadNone. /Set/Robot carries kind, variant sets and a payload whose layer defines /Robot/Geo. Does /Set/Robot/Geo exist?",
+      code: 'stage = Usd.Stage.Open("set.usda", Usd.Stage.LoadNone)\nstage.GetPrimAtPath("/Set/Robot/Geo").IsValid()',
+      a: "No (False)", why: "/Set/Robot exists with everything authored outside the payload, but nothing inside the payload composes until it is loaded." }
+  ];
+  const pzHost = $("#puzzles");
+  puzzles.forEach((p, i) => {
+    const el = document.createElement("article");
+    el.className = "pz";
+    const codeHtml = '<div class="code" data-lang="' + (p.code.startsWith("stage") ? "python" : "usda") + '"><div class="bar"><span>' + (p.code.startsWith("stage") ? "python" : "usda") + '</span></div><pre><code></code></pre></div>';
+    el.innerHTML = '<header><span class="t">' + (i + 1) + ". " + p.t + '</span><span class="lv">' + p.lv + '</span></header><div class="q"><p>' + esc(p.q) + '</p>' + codeHtml + '<button class="reveal" type="button" aria-expanded="false">Reveal answer</button></div><div class="ans" hidden><p><b>' + esc(p.a) + '</b></p><p>' + esc(p.why) + '</p></div>';
+    const lang = p.code.startsWith("stage") ? "python" : "usda";
+    const codeSrc = p.code.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    el.querySelector("code").innerHTML = hl(codeSrc, lang);
+    const btn = el.querySelector(".reveal"), ans = el.querySelector(".ans");
+    btn.addEventListener("click", () => { const open = ans.hidden; ans.hidden = !open; btn.setAttribute("aria-expanded", String(open)); btn.textContent = open ? "Hide answer" : "Reveal answer"; });
+    pzHost.appendChild(el);
+  });
+
+  /* ---------- projects ---------- */
+  const projects = [
+    { n: "Stage inspector CLI", lv: "Level 1", areas: ["Data Modeling", "Debugging"], goal: "A Python CLI that prints a stage's prim tree with type, kind, applied API schemas, and for chosen attributes the layer that wins.",
+      steps: ["Open with Usd.Stage.Open; traverse with Usd.PrimRange and instance proxies", "Print GetTypeName, Usd.ModelAPI kind, GetAppliedSchemas", "For --attr names, print GetResolveInfo source and the top of GetPropertyStack", "Add --flatten-diff: compare stage.Flatten() with the root layer"],
+      done: ["Correct on the Kitchen Set and ALab", "Runs in under 2 s on Kitchen Set", "Matches what usdview's Layer Stack tab shows for 5 sampled attributes"] },
+    { n: "LIVERPS puzzle set", lv: "Level 1", areas: ["Composition"], goal: "Ten tiny .usda scenes, each isolating one strength rule, with an answer key verified by script.",
+      steps: ["Start from the nine puzzles above; add one for relocates", "Write each scene by hand, predict, then check with a pytest that reads the resolved value", "Add one case per arc that crosses a reference boundary"],
+      done: ["Every test passes", "You can explain each answer out loud without notes"] },
+    { n: "Component publisher", lv: "Level 2", areas: ["Pipeline Development", "Data Exchange"], goal: "Turn a Blender export into the interface/payload/geo/mtl layout with variants, validated on publish.",
+      steps: ["Export from Blender with relative paths and a root prim", "Split geometry into geo.usdc and materials into mtl.usda with Sdf.CopySpec", "Write robot.usd: defaultPrim, kind, assetInfo, extentsHint, payload, a lod variant set", "Run usdchecker and fail the publish on errors"],
+      done: ["Opens with LoadNone in under 50 ms", "Variant switch changes geometry in usdview", "usdchecker reports no errors"] },
+    { n: "Scatter at scale", lv: "Level 2", areas: ["Content Aggregation"], goal: "100,000 rocks two ways, measured.",
+      steps: ["Version A: references with instanceable = true", "Version B: one PointInstancer with protoIndices, positions, orientations, scales", "Measure open time, memory and usdview frame rate for both", "Then vary 10% of rocks by variant and watch prototype count grow"],
+      done: ["A short table of timings and memory", "You can say when each approach wins"] },
+    { n: "Synthetic-data shot builder", lv: "Level 3", areas: ["Pipeline Development", "Visualization"], goal: "Compose randomized robotics shots from a template and render RGB, depth and instance-ID AOVs.",
+      steps: ["One template layer using expressionVariables for SHOT and SEED", "Sublayer per shot: environment variant, lighting rig, camera, robot pose", "RenderSettings + RenderProduct + RenderVars for color, depth, instance ID", "Render with usdrecord or a Hydra script; map IDs back to prim paths for labels"],
+      done: ["100 shots generated from one template", "Every mask pixel maps to a prim path", "Re-running with the same seed reproduces identical frames"] },
+    { n: "Track-ID schema beside UsdSemantics", lv: "Level 3", areas: ["Customizing USD"], goal: "Classes go in the built-in SemanticsLabelsAPI; write a small applied API schema for the stable track ID it lacks, first codeless, then compiled.",
+      steps: ["Label classes with SemanticsLabelsAPI:class on project 5's assets", "Write schema.usda for TrackLabelAPI; generate a codeless plugin and apply it from Python", "Regenerate as C++ and build against your OpenUSD", "Read both in project 5's ID pass to emit class + track per mask"],
+      done: ["Schema visible in Usd.SchemaRegistry", "Both builds load in usdview", "Labels survive a round-trip through usdcat"] },
+    { n: "Geometry Nodes to Unreal via USD", lv: "Level 3", areas: ["Data Exchange"], goal: "Bake procedural Blender output to USD with primvars and PointInstancers, then load it in Unreal's USD Stage Editor.",
+      steps: ["Write a data-mapping document: Blender attribute → USD primvar and interpolation", "Export instances as a PointInstancer, attributes as primvars", "Open in Unreal 5.7+ USD Stage Editor; compare against Interchange import", "List every loss and fix it upstream"],
+      done: ["Instances, transforms and primvars match in both apps", "The mapping document covers every attribute"] },
+    { n: "Native .usda reader in Zig", lv: "Level 4", areas: ["Data Modeling", "Core Spec"], goal: "Parse the usda grammar from the Core Specification into a spec tree, without the C++ libraries.",
+      steps: ["Tokenizer: #usda header, parenthesized metadata, def/over/class, quoted names, type names with [] and uniform/custom, @asset@ and @@@ escapes, </paths>, dictionaries", "Parse properties, .timeSamples, .connect, list-op keywords, variantSet blocks", "Store specs in an arena keyed by path", "Golden-test against usdcat output on the Kitchen Set", "Stretch: read .usdc crate files (PXR-USDC header; TOKENS, STRINGS, FIELDS, FIELDSETS, PATHS, SPECS sections; LZ4 and integer compression)"],
+      done: ["Every Kitchen Set .usda layer parses", "Re-emitted text matches usdcat after normalization"] },
+    { n: "Gaussian splat round-trip", lv: "Level 4", areas: ["Visualization", "Customizing USD"], goal: "Turn a 3DGS .ply into a ParticleField3DGaussianSplat prim and render it with hdParticleField.",
+      steps: ["Read the .ply (positions, rotations, scales, opacity, SH coefficients)", "Write the attribute APIs; reorder SH coefficients to USD's per-particle layout", "Render with hdParticleField; compare against the training viewer", "Stretch: wrap the reader as the file format plugin from chapter 07"],
+      done: ["Visual match on a reference view", "Degree-0 and degree-3 files both load"] }
+  ];
+  const pj = $("#proj");
+  projects.forEach((p, i) => {
+    const el = document.createElement("article");
+    el.className = "pj";
+    el.innerHTML = '<div class="top"><h3>' + (i + 1) + ". " + esc(p.n) + '</h3><div class="tags"><span class="tag lv">' + p.lv + '</span>' + p.areas.map(a => '<span class="tag">' + a + '</span>').join("") + '</div></div><p>' + esc(p.goal) + '</p><div class="cols"><div><h4>Steps</h4><ol>' + p.steps.map(s => "<li>" + esc(s) + "</li>").join("") + '</ol></div><div><h4>Done when</h4><ul>' + p.done.map(s => "<li>" + esc(s) + "</li>").join("") + '</ul></div></div>';
+    pj.appendChild(el);
+  });
+
+  /* ---------- exam ---------- */
+  const areas = [
+    { n: "Composition", w: 23, know: "All seven arcs, when to use each, list-op semantics, implied inherits, ancestral arcs, debugging complex LIVERPS cases.", where: "#composition" },
+    { n: "Data Exchange", w: 15, know: "Data-mapping documents, importers and exporters, units and up axis, primvar interpolation, validation of converted data.", where: "#assets" },
+    { n: "Pipeline Development", w: 14, know: "Pipeline design, asset management and versioning, exporter hooks, build configurations, flattening and removing proprietary dependencies.", where: "#assets" },
+    { n: "Data Modeling", w: 13, know: "Usd and Sdf structures, prims, attributes vs relationships, primvars, value types (float, token, matrix4d), time samples, built-in schemas.", where: "#stack" },
+    { n: "Debugging & Troubleshooting", w: 11, know: "Introspecting stages, fixing composition results, finding poorly authored data, optimizing load and render times.", where: "#resolution" },
+    { n: "Content Aggregation", w: 10, know: "Modular components, native and point instancing, overriding instanced assets, building large scenes.", where: "#assets" },
+    { n: "Visualization", w: 8, know: "UsdGeom, UsdShade and UsdLux: meshes, cameras, materials, lights.", where: "#schemas" },
+    { n: "Customizing USD", w: 6, know: "Plugins: custom schemas, file format plugins, custom kinds, variant fallbacks.", where: "#extending" }
+  ];
+  const bars = $("#bars");
+  areas.forEach((a, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "bar" + (i === 0 ? " top" : ""); b.setAttribute("aria-expanded", "false");
+    b.innerHTML = '<span class="lbl">' + a.n + '</span><span class="track"><span class="fill" style="width:' + (a.w / 25 * 100) + '%"></span></span><span class="pct tnum">' + a.w + '%</span>';
+    b.addEventListener("click", () => {
+      bars.querySelectorAll(".bar").forEach(x => x.setAttribute("aria-expanded", "false"));
+      b.setAttribute("aria-expanded", "true");
+      $("#areaDetail").innerHTML = '<p><b>' + a.n + '</b> · about ' + Math.round(a.w * 0.6) + ' of 60 study hours</p><p>' + a.know + ' <a href="' + a.where + '">Go to the chapter</a></p>';
+    });
+    bars.appendChild(b);
+    if (i === 0) b.click();
+  });
+
+  /* ---------- roadmap checklist ---------- */
+  const phases = [
+    { t: "Weeks 1–3 · Foundations", items: ["Quickstart PDF + glossary: Stage, Layer, Prim, Property, Spec, Path", "Install usd-core; build OpenUSD once for usdview", "Learn OpenUSD modules 1–2 with every notebook", "Hand-write a .usda; open it in usdview and usdcat", "Author Xforms, a Mesh, a Camera, a light, time samples in Python", "Build: render an animated scene with usdrecord"] },
+    { t: "Weeks 4–6 · Composition", items: ["Learn OpenUSD modules 3–5", "Survival Guide: Building Blocks + Composition", "Author every arc by hand, including relocates", "Solve all nine puzzles in chapter 02", "Trace prims in Kitchen Set and ALab with usdview", "Build: a shot with department sublayers over an asset library"] },
+    { t: "Weeks 7–9 · Production structure", items: ["Learn OpenUSD modules 6–8", "Restructure an asset into interface/payload/geo/mtl", "Project 4: instancing at scale, measured", "Project 3: component publisher with usdchecker", "Write one importer or exporter with a mapping document", "Build: a validated asset library and an assembly"] },
+    { t: "Weeks 10–12 · Extending and rendering", items: ["Codeless schema, then compiled schema", "A minimal ArResolver for a URI scheme", "A Hydra filtering scene index", "UsdShade + MaterialX, UsdSkel and UsdPhysics in one app each", "Take the certification study guide; book the exam", "Build: project 5, 8 or 9"] }
+  ];
+  const ticks = store.get("ousd-roadmap", {});
+  const rm = $("#roadmap");
+  let total = 0;
+  phases.forEach((ph, pi) => {
+    const box = document.createElement("div");
+    box.className = "card phase";
+    box.innerHTML = '<h4>' + ph.t + '<span class="tnum" data-ph="' + pi + '"></span></h4>';
+    ph.items.forEach((it, ii) => {
+      const id = "rm-" + pi + "-" + ii; total++;
+      const lab = document.createElement("label");
+      lab.className = "chk"; lab.setAttribute("for", id);
+      lab.innerHTML = '<input type="checkbox" id="' + id + '"' + (ticks[id] ? " checked" : "") + '><span>' + esc(it) + '</span>';
+      lab.querySelector("input").addEventListener("change", e => { ticks[id] = e.target.checked; store.set("ousd-roadmap", ticks); updateProg(); });
+      box.appendChild(lab);
+    });
+    rm.appendChild(box);
+  });
+  function updateProg() {
+    let done = 0;
+    phases.forEach((ph, pi) => {
+      let d = 0; ph.items.forEach((_, ii) => { if (ticks["rm-" + pi + "-" + ii]) d++; });
+      done += d;
+      const s = rm.querySelector('[data-ph="' + pi + '"]'); if (s) s.textContent = d + "/" + ph.items.length;
+    });
+    $("#progTxt").textContent = done + " / " + total;
+    $("#progBar").style.width = (done / total * 100) + "%";
+  }
+  updateProg();
+
+  /* ---------- cheat sheet filter ---------- */
+  const rows = Array.from(document.querySelectorAll("#cheat tbody tr"));
+  const cnt = $("#cheatCnt");
+  function filt() {
+    const q = $("#cheatQ").value.trim().toLowerCase();
+    let n = 0;
+    rows.forEach(r => { const show = !q || r.textContent.toLowerCase().includes(q); r.hidden = !show; if (show) n++; });
+    cnt.textContent = n + " of " + rows.length;
+  }
+  $("#cheatQ").addEventListener("input", filt);
+  filt();
+
+  /* ---------- active chapter in rail ---------- */
+  const links = Array.from(document.querySelectorAll("#railList a"));
+  const map = new Map(links.map(a => [a.getAttribute("href").slice(1), a]));
+  if ("IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove("on")); const a = map.get(e.target.id); if (a) a.classList.add("on"); } });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("main section").forEach(s => obs.observe(s));
+  }
+})();
+</script>
+
+</body>
+</html>
